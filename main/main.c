@@ -12,6 +12,5 @@ void hello_task(void *pvParameter) {
 }
 
 void app_main(void) {
-    // test
     xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
 }
