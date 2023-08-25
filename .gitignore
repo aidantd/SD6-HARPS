@@ -1,0 +1,3 @@
+# This file contains what git should ignore when committing to the repository.
+
+build/
