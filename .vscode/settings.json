@@ -12,6 +12,7 @@
     "stdio.h": "c",
     "i2c.h": "c",
     "gpio_types.h": "c",
-    "uart.h": "c"
+    "uart.h": "c",
+    "bme280.h": "c"
   }
 }
