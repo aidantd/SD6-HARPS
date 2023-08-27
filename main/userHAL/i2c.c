@@ -37,34 +37,30 @@ esp_err_t i2c_master_init(void) {
     return i2c_driver_install(i2c_master_port, configuration.mode, DISABLE_MASTER_RX_BUFFER, DISABLE_MASTER_TX_BUFFER, 0);
 }
 
-esp_err_t i2c_master_write_to_device(uint8_t deviceAddress, uint8_t *data, size_t size) {
-    esp_err_t error = ESP_OK;
-
+esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create_static(data, size);
 
     if (i2c_master_start(handle) == ESP_OK) {
         if (i2c_master_write_byte(handle, (deviceAddress << 1) | I2C_MASTER_WRITE, true) == ESP_OK) {
             if (i2c_master_write(handle, data, size, true) == ESP_OK) {
-                error = i2c_master_stop(handle);
+                return i2c_master_stop(handle);
             }
         }
     }
 
-    return error;
+    return ESP_FAIL;
 }
 
-esp_err_t i2c_master_read_from_device(uint8_t deviceAddress, uint8_t *buffer, size_t size) {
-    esp_err_t error = ESP_OK;
-
+esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create_static(buffer, size);
 
     if (i2c_master_start(handle) == ESP_OK) {
         if (i2c_master_write_byte(handle, (deviceAddress << 1) | I2C_MASTER_READ, true) == ESP_OK) {
             if (i2c_master_read(handle, buffer, size, I2C_MASTER_LAST_NACK) == ESP_OK) {
-                error = i2c_master_stop(handle);
+                return i2c_master_stop(handle);
             }
         }
     }
 
-    return error;
+    return ESP_FAIL;
 }
