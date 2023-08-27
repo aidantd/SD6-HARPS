@@ -9,7 +9,7 @@ ESP-IDF projects are built using CMake. The project build configuration is conta
 files that provide set of directives and instructions describing the project's source files and targets
 (executable, library, or both). 
 
-Below is short explanation of the files in the project folder.
+Below is an explanation of the files in the project folder.
 
 ```
 ├── CMakeLists.txt
@@ -17,7 +17,15 @@ Below is short explanation of the files in the project folder.
 │   ├── CMakeLists.txt
 │   └── main.c
 │   └── peripherals/
+│       └── bme280.c
+│       └── bme280.h
 │   └── tasks/
-│   └── userHAL   
+│       └── basicTask.c
+│       └── pt-task.c
+│   └── userHAL/
+│       └── i2c.c
+│       └── i2c.h
+│       └── uart.c
+│       └── uart.h
 └── README.md                  This is the file you are currently reading
 ```
