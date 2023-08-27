@@ -4,6 +4,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "userHAL/i2c.h"
+#include "userHAL/uart.h"
 
 // External Dependencies
 extern void hello_task(void *pvParameter);
@@ -14,6 +15,14 @@ esp_err_t boardInit(void) {
     esp_err_t error = ESP_OK;
 
     error |= i2c_master_init();
+
+    error |= hal_master_init();
+
+    if (error != ESP_OK) {
+        printf("Error initializing board: %d\n", error);
+    } else {
+        printf("Board initialized successfully\n");
+    }
 
     return error;
 }
