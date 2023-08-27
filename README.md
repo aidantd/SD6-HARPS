@@ -14,7 +14,7 @@ Below is an explanation of the files in the project folder.
 ```
 ├── CMakeLists.txt
 ├── main/
-│   ├── CMakeLists.txt
+│   └── CMakeLists.txt
 │   └── main.c
 │   └── peripherals/
 │       └── bme280.c
