@@ -10,3 +10,5 @@
 // Declarations
 
 esp_err_t hal_master_init(void);
+esp_err_t uart_write_to_line(uint8_t *data, size_t size);
+esp_err_t uart_read_from_line(uint8_t *buffer, size_t size);

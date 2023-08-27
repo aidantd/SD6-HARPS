@@ -5,6 +5,7 @@
 
 // Declarations
 #define SYSTEM_BAUD_RATE 115200
+#define READ_WAIT_TIME 250
 
 esp_err_t hal_master_init(void) {
     esp_err_t error = ESP_OK;
@@ -25,4 +26,12 @@ esp_err_t hal_master_init(void) {
     error |= uart_driver_install(uart_num, 2048, 2048, 0, NULL, 0);
 
     return error;
+}
+
+esp_err_t uart_write_to_line(uint8_t *data, size_t size) {
+    return uart_write_bytes(UART_NUM_0, (const char *)data, size);
+}
+
+esp_err_t uart_read_from_line(uint8_t *buffer, size_t size) {
+    return uart_read_bytes(UART_NUM_0, buffer, size, READ_WAIT_TIME);
 }
