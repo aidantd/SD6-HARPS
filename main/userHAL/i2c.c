@@ -8,6 +8,7 @@
 #define DISABLE_MASTER_TX_BUFFER 0
 
 #define DEV_BOARD
+#define I2C_BUFFER_SIZE 1024
 
 esp_err_t i2c_master_init(void) {
     int i2c_master_port = I2C_NUM_0;
@@ -38,7 +39,8 @@ esp_err_t i2c_master_init(void) {
 }
 
 esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, size_t size) {
-    i2c_cmd_handle_t handle = i2c_cmd_link_create_static(data, size);
+    uint8_t i2cBuffer[I2C_BUFFER_SIZE];
+    i2c_cmd_handle_t handle = i2c_cmd_link_create_static(i2cBuffer, I2C_BUFFER_SIZE);
 
     if (i2c_master_start(handle) == ESP_OK) {
         if (i2c_master_write_byte(handle, (deviceAddress << 1) | I2C_MASTER_WRITE, true) == ESP_OK) {
@@ -52,7 +54,8 @@ esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, size_t size)
 }
 
 esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, size_t size) {
-    i2c_cmd_handle_t handle = i2c_cmd_link_create_static(buffer, size);
+    uint8_t i2cBuffer[I2C_BUFFER_SIZE];
+    i2c_cmd_handle_t handle = i2c_cmd_link_create_static(i2cBuffer, I2C_BUFFER_SIZE);
 
     if (i2c_master_start(handle) == ESP_OK) {
         if (i2c_master_write_byte(handle, (deviceAddress << 1) | I2C_MASTER_READ, true) == ESP_OK) {
