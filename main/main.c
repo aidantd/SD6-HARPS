@@ -8,6 +8,8 @@
 
 // External Dependencies
 extern void hello_task(void *pvParameter);
+extern void wpa2_enterprise_example_task(void *pvParameters);
+extern esp_err_t wifi_init_sta(void);
 
 // Declarations
 
@@ -17,6 +19,8 @@ esp_err_t boardInit(void) {
     error |= i2c_master_init();
 
     error |= uart_master_init();
+
+    error |= wifi_init_sta();
 
     if (error != ESP_OK) {
         printf("Error initializing board: %d\n", error);
