@@ -7,7 +7,7 @@
 #define SYSTEM_BAUD_RATE 115200
 #define READ_WAIT_TIME 250
 
-esp_err_t hal_master_init(void) {
+esp_err_t uart_master_init(void) {
     esp_err_t error = ESP_OK;
     const uart_port_t uart_num = UART_NUM_0;
 

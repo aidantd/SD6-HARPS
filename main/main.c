@@ -16,7 +16,7 @@ esp_err_t boardInit(void) {
 
     error |= i2c_master_init();
 
-    error |= hal_master_init();
+    error |= uart_master_init();
 
     if (error != ESP_OK) {
         printf("Error initializing board: %d\n", error);
