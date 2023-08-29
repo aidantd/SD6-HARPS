@@ -1,6 +1,7 @@
 // Includes
 #include <string.h>
 
+#include "/Users/aidan/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
@@ -74,7 +75,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
         printf("got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-        printf(" ");
+        printf("\n");
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
@@ -141,17 +142,69 @@ esp_err_t wifi_init_sta(void) {
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
         printf("connected to ap SSID:%s password:%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
+        return ESP_OK;
     } else if (bits & WIFI_FAIL_BIT) {
         printf("Failed to connect to SSID:%s, password:%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
+        return ESP_FAIL;
     } else {
         printf("UNEXPECTED EVENT\n");
+        return ESP_FAIL;
     }
-
-    return ESP_OK;
 }
 
-void weatherAPI(void* pvParameter) {
+static void test_on_ping_success(esp_ping_handle_t hdl, void* args) {
+    // optionally, get callback arguments
+    // const char* str = (const char*) args;
+    // printf("%s\r\n", str); // "foo"
+    uint8_t ttl;
+    uint16_t seqno;
+    uint32_t elapsed_time, recv_len;
+    ip_addr_t target_addr;
+    esp_ping_get_profile(hdl, ESP_PING_PROF_SEQNO, &seqno, sizeof(seqno));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_TTL, &ttl, sizeof(ttl));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_IPADDR, &target_addr, sizeof(target_addr));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_SIZE, &recv_len, sizeof(recv_len));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_TIMEGAP, &elapsed_time, sizeof(elapsed_time));
+    printf("succesfull ping\n");
+}
+
+static void test_on_ping_timeout(esp_ping_handle_t hdl, void* args) {
+    uint16_t seqno;
+    ip_addr_t target_addr;
+    esp_ping_get_profile(hdl, ESP_PING_PROF_SEQNO, &seqno, sizeof(seqno));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_IPADDR, &target_addr, sizeof(target_addr));
+    printf("timout on ping\n");
+}
+
+static void test_on_ping_end(esp_ping_handle_t hdl, void* args) {
+    uint32_t transmitted;
+    uint32_t received;
+    uint32_t total_time_ms;
+
+    esp_ping_get_profile(hdl, ESP_PING_PROF_REQUEST, &transmitted, sizeof(transmitted));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_REPLY, &received, sizeof(received));
+    esp_ping_get_profile(hdl, ESP_PING_PROF_DURATION, &total_time_ms, sizeof(total_time_ms));
+    printf("timout on ping\n");
+}
+
+void weatherApiTask(void* pvParameter) {
     while (1) {
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        esp_ping_config_t ping_config = ESP_PING_DEFAULT_CONFIG();
+        ip_addr_t target_addr = {
+            .u_addr.ip4.addr = "8.8.8.8",
+            .type = IPADDR_TYPE_V4,
+        };
+        memcpy(&ping_config.target_addr.u_addr, &target_addr.u_addr, sizeof(target_addr.u_addr));
+        ping_config.count = ESP_PING_COUNT_INFINITE;  // ping in infinite mode, esp_ping_stop can stop it
+
+        esp_ping_callbacks_t cbs;
+        cbs.on_ping_success = test_on_ping_success;
+        cbs.on_ping_timeout = test_on_ping_timeout;
+        cbs.on_ping_end = test_on_ping_end;
+        cbs.cb_args = "foo";  // arguments that will feed to all callback functions, can be NULL
+
+        esp_ping_handle_t ping;
+        esp_ping_new_session(&ping_config, &cbs, &ping);
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }
