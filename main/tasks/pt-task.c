@@ -10,39 +10,81 @@
 // External Dependencies
 
 // Declarations
+#define DEBUG 1
+
+static int initializationStatus = 1;
+static int numSecondsPassed = 0;
+
+static struct registerCalibrationMapBME calibrationData;
+static uint32_t temperature;
+// static uint32_t pressure;
+// static uint32_t humidity;
 
 void pt_task(void *pvParameter) {
     while (1) {
         esp_err_t error = ESP_OK;
-        struct registerMapBME registerData;
-        memset(&registerData, 0, sizeof(registerData));
+        struct registerDataMapBME bmeData;
+        numSecondsPassed++;
 
-        uint8_t writeDataConfig = 0b01001000;
+        if (initializationStatus) {
+            initializationStatus = 0;
+            bme280_init();
 
-        error |= i2c_write_to_device(BME280_ADDRESS, &writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
+            error |= readFromBME(&calibrationData.dig_T1, BME280_REGISTER_DIG_T1, sizeof(calibrationData));
 
-        if (error != ESP_OK) {
-            printf("Error writing to BME280: %d\n", error);
-        } else {
-            printf("Wrote to BME280 successfully\n");
+#ifdef DEBUG
+            if (error == ESP_OK) {
+                printf("Read from BME280 Calibration Successfully\n");
+
+                printf("dig_T1: %X\n", calibrationData.dig_T1);
+                printf("dig_T2: %X\n", calibrationData.dig_T2);
+                printf("dig_T3: %X\n", calibrationData.dig_T3);
+                printf("dig_P1: %X\n", calibrationData.dig_P1);
+                printf("dig_P2: %X\n", calibrationData.dig_P2);
+                printf("dig_P3: %X\n", calibrationData.dig_P3);
+                printf("dig_P4: %X\n", calibrationData.dig_P4);
+                printf("dig_P5: %X\n", calibrationData.dig_P5);
+                printf("dig_P6: %X\n", calibrationData.dig_P6);
+                printf("dig_P7: %X\n", calibrationData.dig_P7);
+                printf("dig_P8: %X\n", calibrationData.dig_P8);
+                printf("dig_P9: %X\n", calibrationData.dig_P9);
+                printf("dig_H1: %X\n", calibrationData.dig_H1);
+                printf("dig_H2: %X\n", calibrationData.dig_H2);
+                printf("dig_H3: %X\n", calibrationData.dig_H3);
+                printf("dig_H4: %X\n", calibrationData.dig_H4);
+                printf("dig_H5: %X\n", calibrationData.dig_H5);
+            } else {
+                printf("Error reading from BME280: %d\n", error);
+            }
         }
+#endif
 
-        error |= i2c_read_from_device(BME280_ADDRESS, &registerData.pressureMSB, BME280_REGISTER_PRESSURE_MSB, sizeof(registerData));
+        memset(&bmeData, 0, sizeof(bmeData));
 
-        if (error != ESP_OK) {
-            printf("Error reading from BME280: %d\n", error);
-        } else {
-            printf("Read from BME280 successfully\n");
+        error |= readFromBME(&bmeData.pressureMSB, BME280_REGISTER_PRESSURE_MSB, sizeof(bmeData));
 
-            printf("PressureLSB: %d\n", registerData.pressureLSB);
-            printf("PressureMSB: %d\n", registerData.pressureMSB);
-            printf("PressureXLSB: %d\n", registerData.pressureXLSB);
-            printf("TemperatureLSB: %d\n", registerData.temperatureLSB);
-            printf("TemperatureMSB: %d\n", registerData.temperatureMSB);
-            printf("TemperatureXLSB: %d\n", registerData.temperatureXLSB);
-            printf("HumidityLSB: %d\n", registerData.humidityLSB);
-            printf("HumidityMSB: %d\n", registerData.humidityMSB);
+        temperature = calculateTemperature(bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
+        printf("Temperature: %ld\n", temperature);
+
+#ifdef DEBUG
+        if (numSecondsPassed % 5 == 0) {
+            numSecondsPassed = 0;
+            if (error == ESP_OK) {
+                printf("Read from BME280 successfully\n");
+
+                printf("PressureLSB: %d\n", bmeData.pressureLSB);
+                printf("PressureMSB: %d\n", bmeData.pressureMSB);
+                printf("PressureXLSB: %d\n", bmeData.pressureXLSB);
+                printf("TemperatureLSB: %d\n", bmeData.temperatureLSB);
+                printf("TemperatureMSB: %d\n", bmeData.temperatureMSB);
+                printf("TemperatureXLSB: %d\n", bmeData.temperatureXLSB);
+                printf("HumidityLSB: %d\n", bmeData.humidityLSB);
+                printf("HumidityMSB: %d\n", bmeData.humidityMSB);
+            } else {
+                printf("Error reading from BME280: %d\n", error);
+            }
         }
+#endif
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
