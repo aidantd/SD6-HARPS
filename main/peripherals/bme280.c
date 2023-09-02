@@ -22,9 +22,13 @@ esp_err_t bme280_init(void) {
     return writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
 }
 
-uint32_t calculateTemperature(uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
-    uint32_t temperature = (temperatureMSB << 11) | (temperatureLSB << 3) | (temperatureXLSB >> 5);
-    // uint32_t var1 = ((((temperature >> 3) - ((uint32_t)calibrationData.dig_T1 << 1))) * ((uint32_t)calibrationData.dig_T2)) >> 11;
+uint32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
+    uint32_t temperature32_t = (temperatureMSB << 11) | (temperatureLSB << 3) | (temperatureXLSB >> 5);
+    uint32_t var1 = ((((temperature32_t >> 3) - ((uint32_t)calibrationData.dig_T1 << 1))) * ((uint32_t)calibrationData.dig_T2)) >> 11;
+    uint32_t var2 = (((((temperature32_t >> 4) - ((uint32_t)calibrationData.dig_T1)) * ((temperature32_t >> 4) - ((uint32_t)calibrationData.dig_T1))) >> 12) * ((uint32_t)calibrationData.dig_T3)) >> 14;
+    uint32_t t_fine = var1 + var2;
+
+    uint32_t temperature = (t_fine * 5 + 128) >> 8;
 
     return temperature;
 }

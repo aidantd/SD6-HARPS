@@ -35,7 +35,6 @@ void pt_task(void *pvParameter) {
 #ifdef DEBUG
             if (error == ESP_OK) {
                 printf("Read from BME280 Calibration Successfully\n");
-
                 printf("dig_T1: %X\n", calibrationData.dig_T1);
                 printf("dig_T2: %X\n", calibrationData.dig_T2);
                 printf("dig_T3: %X\n", calibrationData.dig_T3);
@@ -61,25 +60,25 @@ void pt_task(void *pvParameter) {
 
         memset(&bmeData, 0, sizeof(bmeData));
 
-        error |= readFromBME(&bmeData.pressureMSB, BME280_REGISTER_PRESSURE_MSB, sizeof(bmeData));
+        error |= readFromBME(&bmeData.config, BME280_REGISTER_CONFIG, sizeof(bmeData));
 
-        temperature = calculateTemperature(bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
-        printf("Temperature: %ld\n", temperature);
+        temperature = calculateTemperature(calibrationData, bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
 
 #ifdef DEBUG
         if (numSecondsPassed % 5 == 0) {
             numSecondsPassed = 0;
             if (error == ESP_OK) {
+                printf("Temperature: %ld\n", temperature);
                 printf("Read from BME280 successfully\n");
-
-                printf("PressureLSB: %d\n", bmeData.pressureLSB);
-                printf("PressureMSB: %d\n", bmeData.pressureMSB);
-                printf("PressureXLSB: %d\n", bmeData.pressureXLSB);
-                printf("TemperatureLSB: %d\n", bmeData.temperatureLSB);
-                printf("TemperatureMSB: %d\n", bmeData.temperatureMSB);
-                printf("TemperatureXLSB: %d\n", bmeData.temperatureXLSB);
-                printf("HumidityLSB: %d\n", bmeData.humidityLSB);
-                printf("HumidityMSB: %d\n", bmeData.humidityMSB);
+                printf("Config: %X\n", bmeData.config);
+                printf("Pressure MSB: %X\n", bmeData.pressureMSB);
+                printf("Pressure LSB: %X\n", bmeData.pressureLSB);
+                printf("Pressure XLSB: %X\n", bmeData.pressureXLSB);
+                printf("Temperature MSB: %X\n", bmeData.temperatureMSB);
+                printf("Temperature LSB: %X\n", bmeData.temperatureLSB);
+                printf("Temperature XLSB: %X\n", bmeData.temperatureXLSB);
+                printf("Humidity MSB: %X\n", bmeData.humidityMSB);
+                printf("Humidity LSB: %X\n", bmeData.humidityLSB);
             } else {
                 printf("Error reading from BME280: %d\n", error);
             }
