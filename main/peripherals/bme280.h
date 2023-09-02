@@ -42,6 +42,7 @@ typedef struct registerCalibrationMapBME {
     uint8_t dig_H3;
     int16_t dig_H4;
     int16_t dig_H5;
+    int16_t dig_H6;
 };
 
 enum registerPointerValuesBME {
@@ -65,6 +66,7 @@ enum registerPointerValuesBME {
     // Overlapping Calibration Registers
     BME280_REGISTER_DIG_H4,
     BME280_REGISTER_DIG_H5,
+    BME280_REGISTER_DIG_H6 = 0xE7,
 
     // Data Registers
     BME280_REGISTER_CONFIG = 0xF5,
@@ -83,3 +85,4 @@ esp_err_t writeToBME(uint8_t *data, uint8_t registerAddress, size_t size);
 esp_err_t bme280_init(void);
 int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB);
 uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB);
+uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB);

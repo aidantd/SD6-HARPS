@@ -62,3 +62,18 @@ uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uin
 
     return (uint32_t)pressure;
 }
+
+// Returns the humidity in %RH as an unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
+// For example, an output of 47445 represents 47445/1024 = 46.333 %RH.
+// Note: Some crazy math is going on here so may want to quadruple check later
+uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB) {
+    int32_t humidity32_t = (humidityMSB << 8) | humidityLSB;
+
+    int32_t var1 = t_fine - ((int32_t)76800);
+    var1 = (((((humidity32_t << 14) - (((int32_t)calibrationData.dig_H4) << 20) - (((int32_t)calibrationData.dig_H5) * var1)) + ((int32_t)16384)) >> 15) * ((((((var1 * ((int32_t)calibrationData.dig_H6) >> 10) * (((var1 * ((int32_t)calibrationData.dig_H3) >> 11) + ((int32_t)32768)) >> 10)) + ((int32_t)2097152)) * ((int32_t)calibrationData.dig_H2) + 8192) >> 14)));
+    var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)calibrationData.dig_H1)) >> 4));
+    var1 = (var1 < 0 ? 0 : var1);
+    var1 = (var1 > 419430400 ? 419430400 : var1);
+
+    return (uint32_t)(var1 >> 12);
+}

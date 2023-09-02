@@ -18,7 +18,7 @@ static int numSecondsPassed = 0;
 static struct registerCalibrationMapBME calibrationData;
 static uint32_t temperature;
 static uint32_t pressure;
-// static uint32_t humidity;
+static uint32_t humidity;
 
 void pt_task(void *pvParameter) {
     while (1) {
@@ -64,6 +64,7 @@ void pt_task(void *pvParameter) {
 
         temperature = calculateTemperature(calibrationData, bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
         pressure = calculatePressure(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
+        humidity = calculateHumidity(calibrationData, bmeData.humidityMSB, bmeData.humidityLSB);
 
 #ifdef DEBUG
         if (numSecondsPassed % 5 == 0) {
@@ -73,6 +74,7 @@ void pt_task(void *pvParameter) {
 
                 printf("Temperature: %ld\n", temperature / 100);
                 printf("Pressure: %ld\n", pressure / 256);
+                printf("Humidity: %ld\n", humidity / 1024);
 
                 printf("Config: %X\n", bmeData.config);
                 printf("Pressure MSB: %X\n", bmeData.pressureMSB);
