@@ -8,7 +8,7 @@
 
 // External Dependencies
 extern void hello_task(void *pvParameter);
-void pt_task(void *pvParameter);
+extern void pt_task(void *pvParameter);
 
 // Declarations
 
