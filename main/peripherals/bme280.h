@@ -11,7 +11,7 @@
 // (figure out if we are connected to ground or not)
 #define BME280_ADDRESS 0x76
 
-typedef struct registerDataMapBME {
+struct registerDataMapBME {
     uint8_t config;
     uint8_t unusedRegister;
     uint8_t pressureMSB;
