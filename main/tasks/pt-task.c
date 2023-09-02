@@ -68,7 +68,7 @@ void pt_task(void *pvParameter) {
         if (numSecondsPassed % 5 == 0) {
             numSecondsPassed = 0;
             if (error == ESP_OK) {
-                printf("Temperature: %ld\n", temperature);
+                printf("Temperature: %ld\n", temperature / 100);
                 printf("Read from BME280 successfully\n");
                 printf("Config: %X\n", bmeData.config);
                 printf("Pressure MSB: %X\n", bmeData.pressureMSB);

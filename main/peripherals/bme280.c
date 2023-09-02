@@ -22,13 +22,16 @@ esp_err_t bme280_init(void) {
     return writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
 }
 
+// Returns the temperature in degrees Celsius as a scaled whole number.
+// For example, an output of 5123 represents 51.23 degrees Celsius.
 uint32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
-    uint32_t temperature32_t = (temperatureMSB << 11) | (temperatureLSB << 3) | (temperatureXLSB >> 5);
-    uint32_t var1 = ((((temperature32_t >> 3) - ((uint32_t)calibrationData.dig_T1 << 1))) * ((uint32_t)calibrationData.dig_T2)) >> 11;
-    uint32_t var2 = (((((temperature32_t >> 4) - ((uint32_t)calibrationData.dig_T1)) * ((temperature32_t >> 4) - ((uint32_t)calibrationData.dig_T1))) >> 12) * ((uint32_t)calibrationData.dig_T3)) >> 14;
-    uint32_t t_fine = var1 + var2;
+    int32_t temperature32_t = (temperatureMSB << 12) | (temperatureLSB << 4) | (temperatureXLSB >> 4);
 
-    uint32_t temperature = (t_fine * 5 + 128) >> 8;
+    int32_t var1 = ((((temperature32_t >> 3) - ((int32_t)calibrationData.dig_T1 << 1))) * ((int32_t)calibrationData.dig_T2)) >> 11;
+    int32_t var2 = (((((temperature32_t >> 4) - ((int32_t)calibrationData.dig_T1)) * ((temperature32_t >> 4) - ((int32_t)calibrationData.dig_T1))) >> 12) * ((int32_t)calibrationData.dig_T3)) >> 14;
+    int32_t t_fine = var1 + var2;
+
+    int32_t temperature = (t_fine * 5 + 128) >> 8;
 
     return temperature;
 }

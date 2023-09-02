@@ -13,6 +13,7 @@
 
 typedef struct registerDataMapBME {
     uint8_t config;
+    uint8_t unusedRegister;
     uint8_t pressureMSB;
     uint8_t pressureLSB;
     uint8_t pressureXLSB;
