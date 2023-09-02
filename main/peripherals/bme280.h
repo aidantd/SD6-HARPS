@@ -9,10 +9,10 @@
 
 // The slave address of the bme280 is 0x77 when SD0 is connected to VDDIO, and 0x76 when SD0 is connected to GND
 // (figure out if we are connected to ground or not)
-#define BME280_ADDRESS 0b1110111
+#define BME280_ADDRESS 0x76
 
-struct registerMapBME {
-    uint8_t config;
+typedef struct registerMapBME {
+    // uint8_t config;
     uint8_t pressureMSB;
     uint8_t pressureLSB;
     uint8_t pressureXLSB;
@@ -21,7 +21,7 @@ struct registerMapBME {
     uint8_t temperatureXLSB;
     uint8_t humidityMSB;
     uint8_t humidityLSB;
-};
+} registerMapBME_t;
 
 enum registerPointerValuesBME {
     BME280_REGISTER_CONFIG = 0xF5,
@@ -35,5 +35,5 @@ enum registerPointerValuesBME {
     BME280_REGISTER_HUMIDITY_LSB = 0xFE
 };
 
-esp_err_t readFromBME(uint8_t *buffer, size_t size);
-esp_err_t writeToBME(uint8_t *data, size_t size);
+// esp_err_t readFromBME(uint8_t *buffer, size_t size);
+// esp_err_t writeToBME(uint8_t *data, size_t size);

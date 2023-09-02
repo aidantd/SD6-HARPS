@@ -16,6 +16,6 @@ void hello_task(void *pvParameter) {
         printf("This is the start of the HARPS project.\n");
         printf("I = %d\n\n", num);
         num++;
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
