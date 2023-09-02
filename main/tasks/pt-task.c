@@ -17,7 +17,7 @@ static int numSecondsPassed = 0;
 
 static struct registerCalibrationMapBME calibrationData;
 static uint32_t temperature;
-// static uint32_t pressure;
+static uint32_t pressure;
 // static uint32_t humidity;
 
 void pt_task(void *pvParameter) {
@@ -63,13 +63,17 @@ void pt_task(void *pvParameter) {
         error |= readFromBME(&bmeData.config, BME280_REGISTER_CONFIG, sizeof(bmeData));
 
         temperature = calculateTemperature(calibrationData, bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
+        pressure = calculatePressure(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
 
 #ifdef DEBUG
         if (numSecondsPassed % 5 == 0) {
             numSecondsPassed = 0;
             if (error == ESP_OK) {
-                printf("Temperature: %ld\n", temperature / 100);
                 printf("Read from BME280 successfully\n");
+
+                printf("Temperature: %ld\n", temperature / 100);
+                printf("Pressure: %ld\n", pressure / 256);
+
                 printf("Config: %X\n", bmeData.config);
                 printf("Pressure MSB: %X\n", bmeData.pressureMSB);
                 printf("Pressure LSB: %X\n", bmeData.pressureLSB);
