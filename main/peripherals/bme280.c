@@ -29,6 +29,7 @@ esp_err_t bme280_init(void) {
 int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
     int32_t temperature32_t = (temperatureMSB << 12) | (temperatureLSB << 4) | (temperatureXLSB >> 4);
 
+    // Based on the BME280 datasheet, the temperature calculation requires the following steps:
     int32_t var1 = ((((temperature32_t >> 3) - ((int32_t)calibrationData.dig_T1 << 1))) * ((int32_t)calibrationData.dig_T2)) >> 11;
     int32_t var2 = (((((temperature32_t >> 4) - ((int32_t)calibrationData.dig_T1)) * ((temperature32_t >> 4) - ((int32_t)calibrationData.dig_T1))) >> 12) * ((int32_t)calibrationData.dig_T3)) >> 14;
     temperature_fine = var1 + var2;
@@ -43,6 +44,7 @@ int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, u
 uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB) {
     int32_t pressure32_t = (pressureMSB << 12) | (pressureLSB << 4) | (pressureXLSB >> 4);
 
+    // Based on the BME280 datasheet, the pressure calculation requires the following steps:
     int64_t var1 = ((int64_t)temperature_fine) - 128000;
     int64_t var2 = var1 * var1 * (int64_t)calibrationData.dig_P6;
     var2 = var2 + ((var1 * (int64_t)calibrationData.dig_P5) << 17);
@@ -69,6 +71,7 @@ uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uin
 uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB) {
     int32_t humidity32_t = (humidityMSB << 8) | humidityLSB;
 
+    // Based on the BME280 datasheet, the humidity calculation requires the following steps:
     int32_t var1 = temperature_fine - ((int32_t)76800);
     var1 = (((((humidity32_t << 14) - (((int32_t)calibrationData.dig_H4) << 20) - (((int32_t)calibrationData.dig_H5) * var1)) + ((int32_t)16384)) >> 15) * ((((((var1 * ((int32_t)calibrationData.dig_H6) >> 10) * (((var1 * ((int32_t)calibrationData.dig_H3) >> 11) + ((int32_t)32768)) >> 10)) + ((int32_t)2097152)) * ((int32_t)calibrationData.dig_H2) + 8192) >> 14)));
     var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)calibrationData.dig_H1)) >> 4));

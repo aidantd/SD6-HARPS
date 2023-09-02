@@ -13,6 +13,7 @@
 
 struct registerDataMapBME {
     uint8_t config;
+    // This register depicts the jump in the position of the data registers
     uint8_t unusedRegister;
     uint8_t pressureMSB;
     uint8_t pressureLSB;
@@ -24,7 +25,7 @@ struct registerDataMapBME {
     uint8_t humidityLSB;
 };
 
-typedef struct registerCalibrationMapBME {
+struct registerCalibrationMapBME {
     uint16_t dig_T1;
     int16_t dig_T2;
     int16_t dig_T3;
@@ -63,9 +64,11 @@ enum registerPointerValuesBME {
     BME280_REGISTER_DIG_H2 = 0xE1,
     BME280_REGISTER_DIG_H3 = 0xE3,
 
-    // Overlapping Calibration Registers
+    // Overlapping Calibration Registers (TODO: Determine if handline correctly))
     BME280_REGISTER_DIG_H4,
     BME280_REGISTER_DIG_H5,
+
+    //  Calibration Register
     BME280_REGISTER_DIG_H6 = 0xE7,
 
     // Data Registers
