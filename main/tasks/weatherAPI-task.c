@@ -1,4 +1,5 @@
 // Includes
+#include <stdio.h>
 #include <string.h>
 
 #include "/Users/aidan/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
@@ -24,25 +25,62 @@
 #define ESP_WIFI_PASS "BigBrainers11!!"
 #define ESP_MAXIMUM_RETRY 4
 
-#define MAX_HTTP_OUTPUT_BUFFER 2048
-
-/* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t s_wifi_event_group;
-
 /* The event group allows multiple bits for each event, but we only care about two events:
  * - we are connected to the AP with an IP
  * - we failed to connect after the maximum amount of retries */
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
+#define MAX_HTTP_OUTPUT_BUFFER 2048
+
+/* FreeRTOS event group to signal when we are connected*/
+static EventGroupHandle_t s_wifi_event_group;
+
 static int s_retry_num = 0;
 
-static int findMinimum(int a, int b) {
-    if (a < b) {
-        return a;
-    } else {
-        return b;
+char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
+
+void printJsonFormatted(const char* json) {
+    if (json == NULL || json[0] == '\0') {
+        printf("Invalid JSON input\n");
+        return;
     }
+
+    int indentLevel = 0;
+    int len = strlen(json);
+    char lastChar = '\0';
+
+    for (int i = 0; i < len; i++) {
+        char currentChar = json[i];
+
+        if (currentChar == '{' || currentChar == '[') {
+            putchar(currentChar);
+            putchar('\n');
+            indentLevel++;
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+        } else if (currentChar == '}' || currentChar == ']') {
+            putchar('\n');
+            indentLevel--;
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+            putchar(currentChar);
+        } else if (currentChar == ',') {
+            putchar(currentChar);
+            putchar('\n');
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+        } else {
+            putchar(currentChar);
+        }
+
+        lastChar = currentChar;
+    }
+
+    putchar('\n');
 }
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
@@ -67,87 +105,61 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 }
 
 esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
-    static char* output_buffer;  // Buffer to store response of http request from event handler
-    static int output_len;       // Stores number of bytes read
+    int jsonOffset = 0;
+    memset(jsonResponse, 0, MAX_HTTP_OUTPUT_BUFFER);
     switch (evt->event_id) {
     case HTTP_EVENT_ERROR:
-        printf("HTTP_EVENT_ERROR");
         break;
     case HTTP_EVENT_ON_CONNECTED:
-        printf("HTTP_EVENT_ON_CONNECTED\n");
         break;
     case HTTP_EVENT_HEADER_SENT:
+#ifdef DEBUG
         printf("HTTP_EVENT_HEADER_SENT\n");
+#endif
         break;
     case HTTP_EVENT_ON_HEADER:
+#ifdef DEBUG
         printf("HTTP_EVENT_ON_HEADER, key=%s, value=%s\n", evt->header_key, evt->header_value);
+#endif
         break;
     case HTTP_EVENT_ON_DATA:
+#ifdef DEBUG
         printf("HTTP_EVENT_ON_DATA, len=%d\n", evt->data_len);
-        // Clean the buffer in case of a new request
-        if (output_len == 0 && evt->user_data) {
-            // we are just starting to copy the output data into the use
-            memset(evt->user_data, 0, MAX_HTTP_OUTPUT_BUFFER);
-        }
-        /*
-         *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
-         *  However, event handler can also be used in case chunked encoding is used.
-         */
-        if (!esp_http_client_is_chunked_response(evt->client)) {
-            // If user_data buffer is configured, copy the response into the buffer
-            int copy_len = 0;
-            if (evt->user_data) {
-                // The last byte in evt->user_data is kept for the NULL character in case of out-of-bound access.
-                copy_len = findMinimum(evt->data_len, (MAX_HTTP_OUTPUT_BUFFER - output_len));
-                if (copy_len) {
-                    memcpy(evt->user_data + output_len, evt->data, copy_len);
-                }
-            } else {
-                int content_len = esp_http_client_get_content_length(evt->client);
-                if (output_buffer == NULL) {
-                    // We initialize output_buffer with 0 because it is used by strlen() and similar functions therefore should be null terminated.
-                    output_buffer = (char*)calloc(content_len + 1, sizeof(char));
-                    output_len = 0;
-                    if (output_buffer == NULL) {
-                        printf("Failed to allocate memory for output buffer\n");
-                        return ESP_FAIL;
-                    }
-                }
-                copy_len = findMinimum(evt->data_len, (content_len - output_len));
-                if (copy_len) {
-                    memcpy(output_buffer + output_len, evt->data, copy_len);
-                }
-            }
-            output_len += copy_len;
-        }
+        printJsonFormatted((char*)evt->data);
+        puts("\n\n");
+// printf("%.*s", evt->data_len, (char*)evt->data);
+#endif
+        // grab data_len bytes of data add it to where we left off in jsonResponse (start at 0)
+        memcpy(jsonResponse + jsonOffset, evt->data, evt->data_len);
+        jsonOffset += evt->data_len;
+
+#ifndef DEBUG
+        printJsonFormatted(jsonResponse);
+#endif
 
         break;
     case HTTP_EVENT_ON_FINISH:
+#ifdef DEBUG
         printf("HTTP_EVENT_ON_FINISH\n");
-        if (output_buffer != NULL) {
-            // Response is accumulated in output_buffer. Uncomment the below line to print the accumulated response
-            printf("Output Bufer: %s\n", output_buffer);
-            free(output_buffer);
-            output_buffer = NULL;
-        }
-        output_len = 0;
+#endif
         break;
     case HTTP_EVENT_DISCONNECTED:
+#ifdef DEBUG
         printf("HTTP_EVENT_DISCONNECTED\n");
+#endif
         int mbedtls_err = 0;
         esp_err_t err = esp_tls_get_and_clear_last_error((esp_tls_error_handle_t)evt->data, &mbedtls_err, NULL);
         if (err != 0) {
+#ifdef DEBUG
             printf("Last esp error code: 0x%x\n", err);
             printf("Last mbedtls failure: 0x%x\n", mbedtls_err);
+#endif
         }
-        if (output_buffer != NULL) {
-            free(output_buffer);
-            output_buffer = NULL;
-        }
-        output_len = 0;
         break;
     case HTTP_EVENT_REDIRECT:
+#ifdef DEBUG
         printf("HTTP_EVENT_REDIRECT\n");
+#endif
         esp_http_client_set_header(evt->client, "From", "user@example.com");
         esp_http_client_set_header(evt->client, "Accept", "text/html");
         esp_http_client_set_redirection(evt->client);
@@ -164,7 +176,9 @@ esp_err_t wifi_init(void) {
     }
     ESP_ERROR_CHECK(ret);
 
+#ifdef DEBUG
     printf("ESP_WIFI_MODE_STA\n");
+#endif
 
     s_wifi_event_group = xEventGroupCreate();
 
@@ -207,8 +221,6 @@ esp_err_t wifi_init(void) {
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    printf("wifi_init finished.\n");
-
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
@@ -249,6 +261,13 @@ static void http_rest_with_url(void) {
 void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
+
+        if (jsonResponse[0] != '\0') {
+            printf("\n*************************************\n");
+            printJsonFormatted(jsonResponse);
+            printf("*************************************\n\n");
+        }
+
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }
