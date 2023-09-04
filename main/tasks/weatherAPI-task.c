@@ -17,6 +17,7 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "nvs_flash.h"
+#include "utility/weatherAPI.h"
 
 // External Dependencies
 
@@ -40,6 +41,7 @@ static int s_retry_num = 0;
 
 char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
 static int jsonOffset = 0;
+struct weatherResponseData weatherData;
 
 void printJsonFormatted(const char* json) {
     if (json == NULL || json[0] == '\0') {
@@ -260,9 +262,11 @@ void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
 
+        // #ifdef DEBUG
         printf("\n\n*******************************************\n");
         printJsonFormatted(jsonResponse);
         printf("*******************************************\n\n");
+        // #endif
 
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
