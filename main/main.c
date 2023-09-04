@@ -9,7 +9,7 @@
 // External Dependencies
 extern void hello_task(void* pvParameter);
 void weatherApiTask(void* pvParameter);
-extern esp_err_t wifi_init_sta(void);
+extern esp_err_t wifi_init(void);
 
 // Declarations
 
@@ -20,7 +20,7 @@ esp_err_t boardInit(void) {
 
     error |= uart_master_init();
 
-    error |= wifi_init_sta();
+    error |= wifi_init();
 
     return error;
 }
@@ -35,5 +35,5 @@ void app_main(void) {
     }
 
     xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
-    xTaskCreate(&weatherApiTask, "weatherAPI", 2048, NULL, 5, NULL);
+    xTaskCreate(&weatherApiTask, "weatherAPI", 4096, NULL, 5, NULL);
 }

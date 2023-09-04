@@ -3,8 +3,11 @@
 
 #include "/Users/aidan/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
 #include "esp_event.h"
+#include "esp_http_client.h"
 #include "esp_log.h"
 #include "esp_system.h"
+#include "esp_tls.h"
+#include "esp_tls_errors.h"
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
 #include "freertos/FreeRTOS.h"
@@ -21,33 +24,7 @@
 #define ESP_WIFI_PASS "BigBrainers11!!"
 #define ESP_MAXIMUM_RETRY 4
 
-#if CONFIG_ESP_WPA3_SAE_PWE_HUNT_AND_PECK
-#define ESP_WIFI_SAE_MODE WPA3_SAE_PWE_HUNT_AND_PECK
-#define EXAMPLE_H2E_IDENTIFIER ""
-#elif CONFIG_ESP_WPA3_SAE_PWE_HASH_TO_ELEMENT
-#define ESP_WIFI_SAE_MODE WPA3_SAE_PWE_HASH_TO_ELEMENT
-#define EXAMPLE_H2E_IDENTIFIER CONFIG_ESP_WIFI_PW_ID
-#elif CONFIG_ESP_WPA3_SAE_PWE_BOTH
-#define ESP_WIFI_SAE_MODE WPA3_SAE_PWE_BOTH
-#define EXAMPLE_H2E_IDENTIFIER CONFIG_ESP_WIFI_PW_ID
-#endif
-#if CONFIG_ESP_WIFI_AUTH_OPEN
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_OPEN
-#elif CONFIG_ESP_WIFI_AUTH_WEP
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WEP
-#elif CONFIG_ESP_WIFI_AUTH_WPA_PSK
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WPA_PSK
-#elif CONFIG_ESP_WIFI_AUTH_WPA2_PSK
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WPA2_PSK
-#elif CONFIG_ESP_WIFI_AUTH_WPA_WPA2_PSK
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WPA_WPA2_PSK
-#elif CONFIG_ESP_WIFI_AUTH_WPA3_PSK
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WPA3_PSK
-#elif CONFIG_ESP_WIFI_AUTH_WPA2_WPA3_PSK
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WPA2_WPA3_PSK
-#elif CONFIG_ESP_WIFI_AUTH_WAPI_PSK
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WAPI_PSK
-#endif
+#define MAX_HTTP_OUTPUT_BUFFER 2048
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -60,7 +37,15 @@ static EventGroupHandle_t s_wifi_event_group;
 
 static int s_retry_num = 0;
 
-static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+static int findMinimum(int a, int b) {
+    if (a < b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -81,7 +66,97 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-esp_err_t wifi_init_sta(void) {
+esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
+    static char* output_buffer;  // Buffer to store response of http request from event handler
+    static int output_len;       // Stores number of bytes read
+    switch (evt->event_id) {
+    case HTTP_EVENT_ERROR:
+        printf("HTTP_EVENT_ERROR");
+        break;
+    case HTTP_EVENT_ON_CONNECTED:
+        printf("HTTP_EVENT_ON_CONNECTED\n");
+        break;
+    case HTTP_EVENT_HEADER_SENT:
+        printf("HTTP_EVENT_HEADER_SENT\n");
+        break;
+    case HTTP_EVENT_ON_HEADER:
+        printf("HTTP_EVENT_ON_HEADER, key=%s, value=%s\n", evt->header_key, evt->header_value);
+        break;
+    case HTTP_EVENT_ON_DATA:
+        printf("HTTP_EVENT_ON_DATA, len=%d\n", evt->data_len);
+        // Clean the buffer in case of a new request
+        if (output_len == 0 && evt->user_data) {
+            // we are just starting to copy the output data into the use
+            memset(evt->user_data, 0, MAX_HTTP_OUTPUT_BUFFER);
+        }
+        /*
+         *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
+         *  However, event handler can also be used in case chunked encoding is used.
+         */
+        if (!esp_http_client_is_chunked_response(evt->client)) {
+            // If user_data buffer is configured, copy the response into the buffer
+            int copy_len = 0;
+            if (evt->user_data) {
+                // The last byte in evt->user_data is kept for the NULL character in case of out-of-bound access.
+                copy_len = findMinimum(evt->data_len, (MAX_HTTP_OUTPUT_BUFFER - output_len));
+                if (copy_len) {
+                    memcpy(evt->user_data + output_len, evt->data, copy_len);
+                }
+            } else {
+                int content_len = esp_http_client_get_content_length(evt->client);
+                if (output_buffer == NULL) {
+                    // We initialize output_buffer with 0 because it is used by strlen() and similar functions therefore should be null terminated.
+                    output_buffer = (char*)calloc(content_len + 1, sizeof(char));
+                    output_len = 0;
+                    if (output_buffer == NULL) {
+                        printf("Failed to allocate memory for output buffer\n");
+                        return ESP_FAIL;
+                    }
+                }
+                copy_len = findMinimum(evt->data_len, (content_len - output_len));
+                if (copy_len) {
+                    memcpy(output_buffer + output_len, evt->data, copy_len);
+                }
+            }
+            output_len += copy_len;
+        }
+
+        break;
+    case HTTP_EVENT_ON_FINISH:
+        printf("HTTP_EVENT_ON_FINISH\n");
+        if (output_buffer != NULL) {
+            // Response is accumulated in output_buffer. Uncomment the below line to print the accumulated response
+            printf("Output Bufer: %s\n", output_buffer);
+            free(output_buffer);
+            output_buffer = NULL;
+        }
+        output_len = 0;
+        break;
+    case HTTP_EVENT_DISCONNECTED:
+        printf("HTTP_EVENT_DISCONNECTED\n");
+        int mbedtls_err = 0;
+        esp_err_t err = esp_tls_get_and_clear_last_error((esp_tls_error_handle_t)evt->data, &mbedtls_err, NULL);
+        if (err != 0) {
+            printf("Last esp error code: 0x%x\n", err);
+            printf("Last mbedtls failure: 0x%x\n", mbedtls_err);
+        }
+        if (output_buffer != NULL) {
+            free(output_buffer);
+            output_buffer = NULL;
+        }
+        output_len = 0;
+        break;
+    case HTTP_EVENT_REDIRECT:
+        printf("HTTP_EVENT_REDIRECT\n");
+        esp_http_client_set_header(evt->client, "From", "user@example.com");
+        esp_http_client_set_header(evt->client, "Accept", "text/html");
+        esp_http_client_set_redirection(evt->client);
+        break;
+    }
+    return ESP_OK;
+}
+
+esp_err_t wifi_init(void) {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -89,7 +164,7 @@ esp_err_t wifi_init_sta(void) {
     }
     ESP_ERROR_CHECK(ret);
 
-    printf("ESP_WIFI_MODE_STA");
+    printf("ESP_WIFI_MODE_STA\n");
 
     s_wifi_event_group = xEventGroupCreate();
 
@@ -105,12 +180,12 @@ esp_err_t wifi_init_sta(void) {
     esp_event_handler_instance_t instance_got_ip;
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
-                                                        &event_handler,
+                                                        &wifi_event_handler,
                                                         NULL,
                                                         &instance_any_id));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
                                                         IP_EVENT_STA_GOT_IP,
-                                                        &event_handler,
+                                                        &wifi_event_handler,
                                                         NULL,
                                                         &instance_got_ip));
 
@@ -132,7 +207,7 @@ esp_err_t wifi_init_sta(void) {
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    printf("wifi_init_sta finished.\n");
+    printf("wifi_init finished.\n");
 
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
@@ -152,59 +227,28 @@ esp_err_t wifi_init_sta(void) {
     }
 }
 
-static void test_on_ping_success(esp_ping_handle_t hdl, void* args) {
-    // optionally, get callback arguments
-    // const char* str = (const char*) args;
-    // printf("%s\r\n", str); // "foo"
-    uint8_t ttl;
-    uint16_t seqno;
-    uint32_t elapsed_time, recv_len;
-    ip_addr_t target_addr;
-    esp_ping_get_profile(hdl, ESP_PING_PROF_SEQNO, &seqno, sizeof(seqno));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_TTL, &ttl, sizeof(ttl));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_IPADDR, &target_addr, sizeof(target_addr));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_SIZE, &recv_len, sizeof(recv_len));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_TIMEGAP, &elapsed_time, sizeof(elapsed_time));
-    printf("succesfull ping\n");
-}
+static void http_rest_with_url(void) {
+    esp_http_client_config_t config = {
+        .url = "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=London&aqi=no",
+        .event_handler = _http_event_handler,
+        .user_data = NULL,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
 
-static void test_on_ping_timeout(esp_ping_handle_t hdl, void* args) {
-    uint16_t seqno;
-    ip_addr_t target_addr;
-    esp_ping_get_profile(hdl, ESP_PING_PROF_SEQNO, &seqno, sizeof(seqno));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_IPADDR, &target_addr, sizeof(target_addr));
-    printf("timout on ping\n");
-}
+    // GET Request
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK) {
+        printf("HTTP GET Status = %d, content_length = %lld\n", esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
+    } else {
+        printf("HTTP GET request failed: %s\n", esp_err_to_name(err));
+    }
 
-static void test_on_ping_end(esp_ping_handle_t hdl, void* args) {
-    uint32_t transmitted;
-    uint32_t received;
-    uint32_t total_time_ms;
-
-    esp_ping_get_profile(hdl, ESP_PING_PROF_REQUEST, &transmitted, sizeof(transmitted));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_REPLY, &received, sizeof(received));
-    esp_ping_get_profile(hdl, ESP_PING_PROF_DURATION, &total_time_ms, sizeof(total_time_ms));
-    printf("timout on ping\n");
+    esp_http_client_cleanup(client);
 }
 
 void weatherApiTask(void* pvParameter) {
     while (1) {
-        esp_ping_config_t ping_config = ESP_PING_DEFAULT_CONFIG();
-        ip_addr_t target_addr = {
-            .u_addr.ip4.addr = "8.8.8.8",
-            .type = IPADDR_TYPE_V4,
-        };
-        memcpy(&ping_config.target_addr.u_addr, &target_addr.u_addr, sizeof(target_addr.u_addr));
-        ping_config.count = ESP_PING_COUNT_INFINITE;  // ping in infinite mode, esp_ping_stop can stop it
-
-        esp_ping_callbacks_t cbs;
-        cbs.on_ping_success = test_on_ping_success;
-        cbs.on_ping_timeout = test_on_ping_timeout;
-        cbs.on_ping_end = test_on_ping_end;
-        cbs.cb_args = "foo";  // arguments that will feed to all callback functions, can be NULL
-
-        esp_ping_handle_t ping;
-        esp_ping_new_session(&ping_config, &cbs, &ping);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        http_rest_with_url();
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }
