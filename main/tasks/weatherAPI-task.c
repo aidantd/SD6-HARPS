@@ -239,7 +239,7 @@ esp_err_t wifi_init(void) {
 
 static void http_rest_with_url(void) {
     esp_http_client_config_t config = {
-        .url = "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=London&aqi=no",
+        .url = "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=Orlando&aqi=no",
         .event_handler = _http_event_handler,
         .user_data = NULL,
     };
