@@ -34,6 +34,5 @@ void app_main(void) {
         printf("Board initialized successfully\n");
     }
 
-    // xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
     xTaskCreate(&weatherApiTask, "weatherAPI", 4096, NULL, 5, NULL);
 }

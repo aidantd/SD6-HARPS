@@ -17,10 +17,13 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "nvs_flash.h"
+#include "utility/weatherApi.h"
 
 // External Dependencies
 
 // Declarations
+
+// The configuration values for the WiFi connection (Change to match your WiFi network)
 #define ESP_WIFI_SSID "ShadowHouse5"
 #define ESP_WIFI_PASS "BigBrainers11!!"
 #define ESP_MAXIMUM_RETRY 4
@@ -38,8 +41,9 @@ static EventGroupHandle_t s_wifi_event_group;
 
 static int s_retry_num = 0;
 
-char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
+static char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
 static int jsonOffset = 0;
+struct weatherResponseData weatherResponse;
 
 void printJsonFormatted(const char* json) {
     if (json == NULL || json[0] == '\0') {
@@ -226,7 +230,7 @@ esp_err_t wifi_init(void) {
     /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
-        printf("connected to ap SSID:%s password:%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
+        printf("Connected to ap SSID:%s password:%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
         return ESP_OK;
     } else if (bits & WIFI_FAIL_BIT) {
         printf("Failed to connect to SSID:%s, password:%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
@@ -260,10 +264,16 @@ void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
 
+        // add logic to parse the jsonresponse and get it into the struct
+        // parseWeatherResponse(jsonResponse, &weatherResponse);
+
+        printf("Location: %s, %s, %s\n", weatherResponse.locationData.name, weatherResponse.locationData.region, weatherResponse.locationData.country);
+#ifdef DEBUG
         printf("\n\n*******************************************\n");
         printJsonFormatted(jsonResponse);
         printf("*******************************************\n\n");
+#endif
 
-        vTaskDelay(3000 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
