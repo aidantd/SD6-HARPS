@@ -39,6 +39,7 @@ static EventGroupHandle_t s_wifi_event_group;
 static int s_retry_num = 0;
 
 char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
+static int jsonOffset = 0;
 
 void printJsonFormatted(const char* json) {
     if (json == NULL || json[0] == '\0') {
@@ -105,8 +106,6 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 }
 
 esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
-    int jsonOffset = 0;
-    memset(jsonResponse, 0, MAX_HTTP_OUTPUT_BUFFER);
     switch (evt->event_id) {
     case HTTP_EVENT_ERROR:
         break;
@@ -116,6 +115,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
 #ifdef DEBUG
         printf("HTTP_EVENT_HEADER_SENT\n");
 #endif
+        memset(jsonResponse, 0, MAX_HTTP_OUTPUT_BUFFER);
+        jsonOffset = 0;
         break;
     case HTTP_EVENT_ON_HEADER:
 #ifdef DEBUG
@@ -123,17 +124,14 @@ esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
 #endif
         break;
     case HTTP_EVENT_ON_DATA:
-#ifdef DEBUG
-        printf("HTTP_EVENT_ON_DATA, len=%d\n", evt->data_len);
-        printJsonFormatted((char*)evt->data);
-        puts("\n\n");
-// printf("%.*s", evt->data_len, (char*)evt->data);
-#endif
-        // grab data_len bytes of data add it to where we left off in jsonResponse (start at 0)
         memcpy(jsonResponse + jsonOffset, evt->data, evt->data_len);
         jsonOffset += evt->data_len;
 
-#ifndef DEBUG
+#ifdef DEBUG
+        printf("HTTP_EVENT_ON_DATA, len=%d\n", evt->data_len);
+        printf("%.*s", evt->data_len, (char*)evt->data);
+        printf("jsonOffset: %d\n", jsonOffset);
+        printf("jsonResponse: %s\n", jsonResponse);
         printJsonFormatted(jsonResponse);
 #endif
 
@@ -262,11 +260,9 @@ void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
 
-        if (jsonResponse[0] != '\0') {
-            printf("\n*************************************\n");
-            printJsonFormatted(jsonResponse);
-            printf("*************************************\n\n");
-        }
+        printf("\n\n*******************************************\n");
+        printJsonFormatted(jsonResponse);
+        printf("*******************************************\n\n");
 
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
