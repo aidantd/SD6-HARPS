@@ -8,6 +8,7 @@
 
 // External Dependencies
 extern void hello_task(void *pvParameter);
+extern void pt_task(void *pvParameter);
 
 // Declarations
 
@@ -31,4 +32,5 @@ void app_main(void) {
     boardInit();
 
     xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
+    xTaskCreate(&pt_task, "pt_task", 2048, NULL, 5, NULL);
 }
