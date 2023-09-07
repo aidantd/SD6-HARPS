@@ -10,5 +10,5 @@
 // Declarations
 
 esp_err_t i2c_master_init(void);
-esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, size_t size);
-esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, size_t size);
+esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, uint8_t registerAddress, size_t size);
+esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, uint8_t registerAddress, size_t size);
