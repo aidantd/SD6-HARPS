@@ -262,11 +262,11 @@ void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
 
-        // #ifdef DEBUG
+#ifdef DEBUG
         printf("\n\n*******************************************\n");
         printJsonFormatted(jsonResponse);
         printf("*******************************************\n\n");
-        // #endif
+#endif
 
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
