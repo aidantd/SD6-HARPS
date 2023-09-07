@@ -53,10 +53,9 @@ void printJsonFormatted(const char* json) {
     }
 
     int indentLevel = 0;
-    int len = strlen(json);
-    char lastChar = '\0';
+    int jsonLength = strlen(json);
 
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < jsonLength; i++) {
         char currentChar = json[i];
 
         if (currentChar == '{' || currentChar == '[') {
@@ -82,8 +81,6 @@ void printJsonFormatted(const char* json) {
         } else {
             putchar(currentChar);
         }
-
-        lastChar = currentChar;
     }
 
     putchar('\n');
