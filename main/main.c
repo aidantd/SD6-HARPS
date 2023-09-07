@@ -7,8 +7,9 @@
 #include "userHAL/uart.h"
 
 // External Dependencies
-extern void hello_task(void *pvParameter);
-extern void pt_task(void *pvParameter);
+extern void weatherApiTask(void* pvParameter);
+extern esp_err_t wifi_init(void);
+extern void pt_task(void* pvParameter);
 
 // Declarations
 
@@ -17,20 +18,22 @@ esp_err_t boardInit(void) {
 
     error |= i2c_master_init();
 
-    error |= hal_master_init();
+    error |= uart_master_init();
 
-    if (error != ESP_OK) {
-        printf("Error initializing board: %d\n", error);
-    } else {
-        printf("Board initialized successfully\n");
-    }
+    error |= wifi_init();
 
     return error;
 }
 
 void app_main(void) {
-    boardInit();
+    if (boardInit() != ESP_OK) {
+        printf("Error initializing board\n");
 
-    xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
+        return;
+    } else {
+        printf("Board initialized successfully\n");
+    }
+
     xTaskCreate(&pt_task, "pt_task", 2048, NULL, 5, NULL);
+    xTaskCreate(&weatherApiTask, "weatherAPI", 4096, NULL, 5, NULL);
 }
