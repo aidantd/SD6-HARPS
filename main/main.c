@@ -7,7 +7,7 @@
 #include "userHAL/uart.h"
 
 // External Dependencies
-void weatherApiTask(void* pvParameter);
+extern void weatherApiTask(void* pvParameter);
 extern esp_err_t wifi_init(void);
 extern void pt_task(void* pvParameter);
 
