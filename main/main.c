@@ -7,7 +7,6 @@
 #include "userHAL/uart.h"
 
 // External Dependencies
-extern void hello_task(void* pvParameter);
 void weatherApiTask(void* pvParameter);
 extern esp_err_t wifi_init(void);
 extern void pt_task(void* pvParameter);
@@ -35,7 +34,6 @@ void app_main(void) {
         printf("Board initialized successfully\n");
     }
 
-    xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
     xTaskCreate(&pt_task, "pt_task", 2048, NULL, 5, NULL);
     xTaskCreate(&weatherApiTask, "weatherAPI", 4096, NULL, 5, NULL);
 }

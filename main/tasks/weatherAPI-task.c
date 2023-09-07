@@ -22,8 +22,11 @@
 // External Dependencies
 
 // Declarations
-#define ESP_WIFI_SSID "ShadowHouse5"
-#define ESP_WIFI_PASS "BigBrainers11!!"
+// #define ESP_WIFI_SSID "ShadowHouse5"
+// #define ESP_WIFI_PASS "BigBrainers11!!"
+#define ESP_WIFI_SSID "Aidan iPhone"
+#define ESP_WIFI_PASS "SpreadSeal"
+
 #define ESP_MAXIMUM_RETRY 4
 
 /* The event group allows multiple bits for each event, but we only care about two events:
