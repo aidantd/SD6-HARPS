@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "/Users/aidan/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
+#include "cJSON.h"
 #include "esp_event.h"
 #include "esp_http_client.h"
 #include "esp_log.h"
@@ -45,6 +46,129 @@ static int s_retry_num = 0;
 char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
 static int jsonOffset = 0;
 struct weatherResponseData weatherData;
+
+static esp_err_t parseJsonResponse(void) {
+    if (jsonResponse[0] == '\0') {
+        printf("Invalid JSON input\n");
+        return ESP_FAIL;
+    }
+
+    cJSON* parsedResponse = cJSON_Parse(jsonResponse);
+    if (parsedResponse == NULL) {
+        cJSON_Delete(parsedResponse);
+        return ESP_FAIL;
+    }
+
+    cJSON* location = cJSON_GetObjectItemCaseSensitive(parsedResponse, "location");
+    cJSON* name = cJSON_GetObjectItemCaseSensitive(location, "name");
+    cJSON* region = cJSON_GetObjectItemCaseSensitive(location, "region");
+    cJSON* country = cJSON_GetObjectItemCaseSensitive(location, "country");
+    cJSON* lat = cJSON_GetObjectItemCaseSensitive(location, "lat");
+    cJSON* lon = cJSON_GetObjectItemCaseSensitive(location, "lon");
+    cJSON* tz_id = cJSON_GetObjectItemCaseSensitive(location, "tz_id");
+    cJSON* localtime_epoch = cJSON_GetObjectItemCaseSensitive(location, "localtime_epoch");
+    cJSON* localtime = cJSON_GetObjectItemCaseSensitive(location, "localtime");
+
+    cJSON* current = cJSON_GetObjectItemCaseSensitive(parsedResponse, "current");
+    cJSON* last_updated_epoch = cJSON_GetObjectItemCaseSensitive(current, "last_updated_epoch");
+    cJSON* last_updated = cJSON_GetObjectItemCaseSensitive(current, "last_updated");
+    cJSON* temp_c = cJSON_GetObjectItemCaseSensitive(current, "temp_c");
+    cJSON* temp_f = cJSON_GetObjectItemCaseSensitive(current, "temp_f");
+    cJSON* is_day = cJSON_GetObjectItemCaseSensitive(current, "is_day");
+
+    cJSON* condition = cJSON_GetObjectItemCaseSensitive(current, "condition");
+    cJSON* text = cJSON_GetObjectItemCaseSensitive(condition, "text");
+    cJSON* icon = cJSON_GetObjectItemCaseSensitive(condition, "icon");
+    cJSON* code = cJSON_GetObjectItemCaseSensitive(condition, "code");
+
+    cJSON* wind_mph = cJSON_GetObjectItemCaseSensitive(current, "wind_mph");
+    cJSON* wind_kph = cJSON_GetObjectItemCaseSensitive(current, "wind_kph");
+    cJSON* wind_degree = cJSON_GetObjectItemCaseSensitive(current, "wind_degree");
+    cJSON* wind_dir = cJSON_GetObjectItemCaseSensitive(current, "wind_dir");
+    cJSON* pressure_mb = cJSON_GetObjectItemCaseSensitive(current, "pressure_mb");
+    cJSON* pressure_in = cJSON_GetObjectItemCaseSensitive(current, "pressure_in");
+    cJSON* precip_mm = cJSON_GetObjectItemCaseSensitive(current, "precip_mm");
+    cJSON* precip_in = cJSON_GetObjectItemCaseSensitive(current, "precip_in");
+    cJSON* humidity = cJSON_GetObjectItemCaseSensitive(current, "humidity");
+    cJSON* cloud = cJSON_GetObjectItemCaseSensitive(current, "cloud");
+    cJSON* feelslike_c = cJSON_GetObjectItemCaseSensitive(current, "feelslike_c");
+    cJSON* feelslike_f = cJSON_GetObjectItemCaseSensitive(current, "feelslike_f");
+    cJSON* vis_km = cJSON_GetObjectItemCaseSensitive(current, "vis_km");
+    cJSON* vis_miles = cJSON_GetObjectItemCaseSensitive(current, "vis_miles");
+    cJSON* uv = cJSON_GetObjectItemCaseSensitive(current, "uv");
+    cJSON* gust_mph = cJSON_GetObjectItemCaseSensitive(current, "gust_mph");
+    cJSON* gust_kph = cJSON_GetObjectItemCaseSensitive(current, "gust_kph");
+
+    // printf("Location: %s, %s, %s\n", name->valuestring, region->valuestring, country->valuestring);
+    // printf("Latitude: %d\n", lat->valueint);
+    // printf("Longitude: %d\n", lon->valueint);
+    // printf("Timezone ID: %s\n", tz_id->valuestring);
+    // printf("Local Time: %s\n", localtime->valuestring);
+    // printf("Local Time Epoch: %d\n", localtime_epoch->valueint);
+    // printf("Last Updated: %s\n", last_updated->valuestring);
+    // printf("Last Updated Epoch: %d\n", last_updated_epoch->valueint);
+    // printf("Temperature (C): %d\n", temp_c->valueint);
+    // printf("Temperature (F): %d\n", temp_f->valueint);
+    // printf("Is Day: %d\n", is_day->valueint);
+    // printf("Condition: %s\n", text->valuestring);
+    // printf("Condition Icon: %s\n", icon->valuestring);
+    // printf("Condition Code: %d\n", code->valueint);
+    // printf("Wind Speed (mph): %d\n", wind_mph->valueint);
+    // printf("Wind Speed (kph): %d\n", wind_kph->valueint);
+    // printf("Wind Degree: %d\n", wind_degree->valueint);
+    // printf("Wind Direction: %s\n", wind_dir->valuestring);
+    // printf("Pressure (mb): %d\n", pressure_mb->valueint);
+    // printf("Pressure (in): %d\n", pressure_in->valueint);
+    // printf("Precipitation (mm): %d\n", precip_mm->valueint);
+    // printf("Precipitation (in): %d\n", precip_in->valueint);
+    // printf("Humidity: %d\n", humidity->valueint);
+    // printf("Cloud: %d\n", cloud->valueint);
+    // printf("Feels Like (C): %d\n", feelslike_c->valueint);
+    // printf("Feels Like (F): %d\n", feelslike_f->valueint);
+    // printf("Visibility (km): %d\n", vis_km->valueint);
+    // printf("Visibility (miles): %d\n", vis_miles->valueint);
+    // printf("UV: %d\n", uv->valueint);
+    // printf("Gust Speed (mph): %d\n", gust_mph->valueint);
+    // printf("Gust Speed (kph): %d\n", gust_kph->valueint);
+
+    weatherData.locationData.name = name->valuestring;
+    weatherData.locationData.region = region->valuestring;
+    weatherData.locationData.country = country->valuestring;
+    weatherData.locationData.lat = lat->valueint;
+    weatherData.locationData.lon = lon->valueint;
+    weatherData.locationData.tz_id = tz_id->valuestring;
+    weatherData.locationData.localtime = localtime->valuestring;
+    weatherData.locationData.localtime_epoch = localtime_epoch->valueint;
+    weatherData.currentWeatherData.last_updated = last_updated->valuestring;
+    weatherData.currentWeatherData.last_updated_epoch = last_updated_epoch->valueint;
+    weatherData.currentWeatherData.temp_c = temp_c->valueint;
+    weatherData.currentWeatherData.temp_f = temp_f->valueint;
+    weatherData.currentWeatherData.is_day = is_day->valueint;
+    weatherData.currentWeatherData.conditionData.text = text->valuestring;
+    weatherData.currentWeatherData.conditionData.icon = icon->valuestring;
+    weatherData.currentWeatherData.conditionData.code = code->valueint;
+    weatherData.currentWeatherData.wind_mph = wind_mph->valueint;
+    weatherData.currentWeatherData.wind_kph = wind_kph->valueint;
+    weatherData.currentWeatherData.wind_degree = wind_degree->valueint;
+    weatherData.currentWeatherData.wind_dir = wind_dir->valuestring;
+    weatherData.currentWeatherData.pressure_mb = pressure_mb->valueint;
+    weatherData.currentWeatherData.pressure_in = pressure_in->valueint;
+    weatherData.currentWeatherData.precip_mm = precip_mm->valueint;
+    weatherData.currentWeatherData.precip_in = precip_in->valueint;
+    weatherData.currentWeatherData.humidity = humidity->valueint;
+    weatherData.currentWeatherData.cloud = cloud->valueint;
+    weatherData.currentWeatherData.feelslike_c = feelslike_c->valueint;
+    weatherData.currentWeatherData.feelslike_f = feelslike_f->valueint;
+    weatherData.currentWeatherData.vis_km = vis_km->valueint;
+    weatherData.currentWeatherData.vis_miles = vis_miles->valueint;
+    weatherData.currentWeatherData.uv = uv->valueint;
+    weatherData.currentWeatherData.gust_mph = gust_mph->valueint;
+    weatherData.currentWeatherData.gust_kph = gust_kph->valueint;
+
+    cJSON_Delete(parsedResponse);
+
+    return ESP_OK;
+}
 
 void printJsonFormatted(const char* json) {
     if (json == NULL || json[0] == '\0') {
@@ -262,9 +386,48 @@ void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
 
-#ifdef DEBUG
+#ifndef DEBUG
         printf("\n\n*******************************************\n");
-        printJsonFormatted(jsonResponse);
+        // printJsonFormatted(jsonResponse);
+        printf("%s\n", jsonResponse);
+        printf("*******************************************\n\n");
+#endif
+
+        parseJsonResponse();
+
+#ifndef DEBUG
+        printf("\n\n*******************************************\n");
+        printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
+        printf("Latitude: %d\n", weatherData.locationData.lat);
+        printf("Longitude: %d\n", weatherData.locationData.lon);
+        printf("Timezone ID: %s\n", weatherData.locationData.tz_id);
+        printf("Local Time: %s\n", weatherData.locationData.localtime);
+        printf("Local Time Epoch: %d\n", weatherData.locationData.localtime_epoch);
+        printf("Last Updated: %s\n", weatherData.currentWeatherData.last_updated);
+        printf("Last Updated Epoch: %d\n", weatherData.currentWeatherData.last_updated_epoch);
+        printf("Temperature (C): %d\n", weatherData.currentWeatherData.temp_c);
+        printf("Temperature (F): %d\n", weatherData.currentWeatherData.temp_f);
+        printf("Is Day: %d\n", weatherData.currentWeatherData.is_day);
+        printf("Condition: %s\n", weatherData.currentWeatherData.conditionData.text);
+        printf("Condition Icon: %s\n", weatherData.currentWeatherData.conditionData.icon);
+        printf("Condition Code: %d\n", weatherData.currentWeatherData.conditionData.code);
+        printf("Wind Speed (mph): %d\n", weatherData.currentWeatherData.wind_mph);
+        printf("Wind Speed (kph): %d\n", weatherData.currentWeatherData.wind_kph);
+        printf("Wind Degree: %d\n", weatherData.currentWeatherData.wind_degree);
+        printf("Wind Direction: %s\n", weatherData.currentWeatherData.wind_dir);
+        printf("Pressure (mb): %d\n", weatherData.currentWeatherData.pressure_mb);
+        printf("Pressure (in): %d\n", weatherData.currentWeatherData.pressure_in);
+        printf("Precipitation (mm): %d\n", weatherData.currentWeatherData.precip_mm);
+        printf("Precipitation (in): %d\n", weatherData.currentWeatherData.precip_in);
+        printf("Humidity: %d\n", weatherData.currentWeatherData.humidity);
+        printf("Cloud: %d\n", weatherData.currentWeatherData.cloud);
+        printf("Feels Like (C): %d\n", weatherData.currentWeatherData.feelslike_c);
+        printf("Feels Like (F): %d\n", weatherData.currentWeatherData.feelslike_f);
+        printf("Visibility (km): %d\n", weatherData.currentWeatherData.vis_km);
+        printf("Visibility (miles): %d\n", weatherData.currentWeatherData.vis_miles);
+        printf("UV: %d\n", weatherData.currentWeatherData.uv);
+        printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
+        printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
         printf("*******************************************\n\n");
 #endif
 
