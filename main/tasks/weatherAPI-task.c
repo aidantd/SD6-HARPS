@@ -99,58 +99,26 @@ static esp_err_t parseJsonResponse(void) {
     cJSON* gust_mph = cJSON_GetObjectItemCaseSensitive(current, "gust_mph");
     cJSON* gust_kph = cJSON_GetObjectItemCaseSensitive(current, "gust_kph");
 
-    // printf("Location: %s, %s, %s\n", name->valuestring, region->valuestring, country->valuestring);
-    // printf("Latitude: %d\n", lat->valueint);
-    // printf("Longitude: %d\n", lon->valueint);
-    // printf("Timezone ID: %s\n", tz_id->valuestring);
-    // printf("Local Time: %s\n", localtime->valuestring);
-    // printf("Local Time Epoch: %d\n", localtime_epoch->valueint);
-    // printf("Last Updated: %s\n", last_updated->valuestring);
-    // printf("Last Updated Epoch: %d\n", last_updated_epoch->valueint);
-    // printf("Temperature (C): %d\n", temp_c->valueint);
-    // printf("Temperature (F): %d\n", temp_f->valueint);
-    // printf("Is Day: %d\n", is_day->valueint);
-    // printf("Condition: %s\n", text->valuestring);
-    // printf("Condition Icon: %s\n", icon->valuestring);
-    // printf("Condition Code: %d\n", code->valueint);
-    // printf("Wind Speed (mph): %d\n", wind_mph->valueint);
-    // printf("Wind Speed (kph): %d\n", wind_kph->valueint);
-    // printf("Wind Degree: %d\n", wind_degree->valueint);
-    // printf("Wind Direction: %s\n", wind_dir->valuestring);
-    // printf("Pressure (mb): %d\n", pressure_mb->valueint);
-    // printf("Pressure (in): %d\n", pressure_in->valueint);
-    // printf("Precipitation (mm): %d\n", precip_mm->valueint);
-    // printf("Precipitation (in): %d\n", precip_in->valueint);
-    // printf("Humidity: %d\n", humidity->valueint);
-    // printf("Cloud: %d\n", cloud->valueint);
-    // printf("Feels Like (C): %d\n", feelslike_c->valueint);
-    // printf("Feels Like (F): %d\n", feelslike_f->valueint);
-    // printf("Visibility (km): %d\n", vis_km->valueint);
-    // printf("Visibility (miles): %d\n", vis_miles->valueint);
-    // printf("UV: %d\n", uv->valueint);
-    // printf("Gust Speed (mph): %d\n", gust_mph->valueint);
-    // printf("Gust Speed (kph): %d\n", gust_kph->valueint);
-
-    weatherData.locationData.name = name->valuestring;
-    weatherData.locationData.region = region->valuestring;
-    weatherData.locationData.country = country->valuestring;
+    memcpy(&weatherData.locationData.name, name->valuestring, strlen(name->valuestring));
+    memcpy(&weatherData.locationData.region, region->valuestring, strlen(region->valuestring));
+    memcpy(&weatherData.locationData.country, country->valuestring, strlen(country->valuestring));
     weatherData.locationData.lat = lat->valueint;
     weatherData.locationData.lon = lon->valueint;
-    weatherData.locationData.tz_id = tz_id->valuestring;
-    weatherData.locationData.localtime = localtime->valuestring;
+    memcpy(&weatherData.locationData.tz_id, tz_id->valuestring, strlen(tz_id->valuestring));
+    memcpy(&weatherData.locationData.localtime, localtime->valuestring, strlen(localtime->valuestring));
     weatherData.locationData.localtime_epoch = localtime_epoch->valueint;
-    weatherData.currentWeatherData.last_updated = last_updated->valuestring;
+    memcpy(&weatherData.currentWeatherData.last_updated, last_updated->valuestring, strlen(last_updated->valuestring));
     weatherData.currentWeatherData.last_updated_epoch = last_updated_epoch->valueint;
     weatherData.currentWeatherData.temp_c = temp_c->valueint;
     weatherData.currentWeatherData.temp_f = temp_f->valueint;
     weatherData.currentWeatherData.is_day = is_day->valueint;
-    weatherData.currentWeatherData.conditionData.text = text->valuestring;
-    weatherData.currentWeatherData.conditionData.icon = icon->valuestring;
+    memcpy(&weatherData.currentWeatherData.conditionData.text, text->valuestring, strlen(text->valuestring));
+    memcpy(&weatherData.currentWeatherData.conditionData.icon, icon->valuestring, strlen(icon->valuestring));
     weatherData.currentWeatherData.conditionData.code = code->valueint;
     weatherData.currentWeatherData.wind_mph = wind_mph->valueint;
     weatherData.currentWeatherData.wind_kph = wind_kph->valueint;
     weatherData.currentWeatherData.wind_degree = wind_degree->valueint;
-    weatherData.currentWeatherData.wind_dir = wind_dir->valuestring;
+    memcpy(&weatherData.currentWeatherData.wind_dir, wind_dir->valuestring, strlen(wind_dir->valuestring));
     weatherData.currentWeatherData.pressure_mb = pressure_mb->valueint;
     weatherData.currentWeatherData.pressure_in = pressure_in->valueint;
     weatherData.currentWeatherData.precip_mm = precip_mm->valueint;
@@ -386,7 +354,7 @@ void weatherApiTask(void* pvParameter) {
     while (1) {
         http_rest_with_url();
 
-#ifndef DEBUG
+#ifdef DEBUG
         printf("\n\n*******************************************\n");
         // printJsonFormatted(jsonResponse);
         printf("%s\n", jsonResponse);

@@ -4,29 +4,30 @@
 // External Dependencies
 
 // Declarations
+#define MAX_FIELD_LENGTH 256
 
 // The below structs are used to store the data from weatherAPI.com
 
 struct condition {
-    char *text;
-    char *icon;
+    char text[256];
+    char icon[256];
     int code;
 };
 
 struct location {
-    char *name;
-    char *region;
-    char *country;
+    char name[256];
+    char region[256];
+    char country[256];
     int lat;
     int lon;
-    char *tz_id;
+    char tz_id[256];
     int localtime_epoch;
-    char *localtime;
+    char localtime[256];
 };
 
 struct currentWeather {
     int last_updated_epoch;
-    char *last_updated;
+    char last_updated[256];
     int temp_c;
     int temp_f;
     int is_day;
@@ -34,7 +35,7 @@ struct currentWeather {
     int wind_mph;
     int wind_kph;
     int wind_degree;
-    char *wind_dir;
+    char wind_dir[256];
     int pressure_mb;
     int pressure_in;
     int precip_mm;
