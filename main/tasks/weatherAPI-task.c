@@ -23,10 +23,10 @@
 // External Dependencies
 
 // Declarations
-// #define ESP_WIFI_SSID "ShadowHouse5"
-// #define ESP_WIFI_PASS "BigBrainers11!!"
-#define ESP_WIFI_SSID "Aidan iPhone"
-#define ESP_WIFI_PASS "SpreadSeal"
+#define ESP_WIFI_SSID "ShadowHouse5"
+#define ESP_WIFI_PASS "BigBrainers11!!"
+// #define ESP_WIFI_SSID "Aidan iPhone"
+// #define ESP_WIFI_PASS "SpreadSeal"
 
 #define ESP_MAXIMUM_RETRY 4
 
@@ -38,6 +38,8 @@
 
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 
+#define WEATHER_API_URL "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=Orlando&aqi=no"
+
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
 
@@ -45,7 +47,10 @@ static int s_retry_num = 0;
 
 char jsonResponse[MAX_HTTP_OUTPUT_BUFFER];
 static int jsonOffset = 0;
-struct weatherResponseData weatherData;
+
+static struct weatherResponseData weatherData;
+
+static char systemIP[16];
 
 static esp_err_t parseJsonResponse(void) {
     if (jsonResponse[0] == '\0') {
@@ -192,7 +197,10 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         printf("connect to the AP fail\n");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
+#ifndef DEBUF
         printf("got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+#endif
+        // memcpy(systemIP, &event->ip_info.ip, 16);
         printf("\n");
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
@@ -333,10 +341,11 @@ esp_err_t wifi_init(void) {
 
 static void http_rest_with_url(void) {
     esp_http_client_config_t config = {
-        .url = "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=Orlando&aqi=no",
+        .url = WEATHER_API_URL,
         .event_handler = _http_event_handler,
         .user_data = NULL,
     };
+
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
     // GET Request
@@ -396,6 +405,7 @@ void weatherApiTask(void* pvParameter) {
         printf("UV: %d\n", weatherData.currentWeatherData.uv);
         printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
         printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
+        printf("System IP: %s", systemIP);
         printf("*******************************************\n\n");
 #endif
 
