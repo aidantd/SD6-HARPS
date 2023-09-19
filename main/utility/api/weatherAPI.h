@@ -9,25 +9,25 @@
 // The below structs are used to store the data from weatherAPI.com
 
 struct condition {
-    char text[256];
-    char icon[256];
+    char text[MAX_FIELD_LENGTH];
+    char icon[MAX_FIELD_LENGTH];
     int code;
 };
 
 struct location {
-    char name[256];
-    char region[256];
-    char country[256];
+    char name[MAX_FIELD_LENGTH];
+    char region[MAX_FIELD_LENGTH];
+    char country[MAX_FIELD_LENGTH];
     int lat;
     int lon;
-    char tz_id[256];
+    char tz_id[MAX_FIELD_LENGTH];
     int localtime_epoch;
-    char localtime[256];
+    char localtime[MAX_FIELD_LENGTH];
 };
 
 struct currentWeather {
     int last_updated_epoch;
-    char last_updated[256];
+    char last_updated[MAX_FIELD_LENGTH];
     int temp_c;
     int temp_f;
     int is_day;
@@ -35,7 +35,7 @@ struct currentWeather {
     int wind_mph;
     int wind_kph;
     int wind_degree;
-    char wind_dir[256];
+    char wind_dir[MAX_FIELD_LENGTH];
     int pressure_mb;
     int pressure_in;
     int precip_mm;
