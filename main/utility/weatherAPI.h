@@ -4,50 +4,51 @@
 // External Dependencies
 
 // Declarations
+#define MAX_FIELD_LENGTH 256
 
 // The below structs are used to store the data from weatherAPI.com
 
 struct condition {
-    char *text;
-    char *icon;
-    char *code;
+    char text[256];
+    char icon[256];
+    int code;
 };
 
 struct location {
-    char *name;
-    char *region;
-    char *country;
-    char *lat;
-    char *lon;
-    char *tz_id;
-    char *localtime_epoch;
-    char *localtime;
+    char name[256];
+    char region[256];
+    char country[256];
+    int lat;
+    int lon;
+    char tz_id[256];
+    int localtime_epoch;
+    char localtime[256];
 };
 
 struct currentWeather {
-    char *last_updated_epoch;
-    char *last_updated;
-    char *temp_c;
-    char *temp_f;
-    char *is_day;
+    int last_updated_epoch;
+    char last_updated[256];
+    int temp_c;
+    int temp_f;
+    int is_day;
     struct condition conditionData;
-    char *wind_mph;
-    char *wind_kph;
-    char *wind_degree;
-    char *wind_dir;
-    char *pressure_mb;
-    char *pressure_in;
-    char *precip_mm;
-    char *precip_in;
-    char *humidity;
-    char *cloud;
-    char *feelslike_c;
-    char *feelslike_f;
-    char *vis_km;
-    char *vis_miles;
-    char *uv;
-    char *gust_mph;
-    char *gust_kph;
+    int wind_mph;
+    int wind_kph;
+    int wind_degree;
+    char wind_dir[256];
+    int pressure_mb;
+    int pressure_in;
+    int precip_mm;
+    int precip_in;
+    int humidity;
+    int cloud;
+    int feelslike_c;
+    int feelslike_f;
+    int vis_km;
+    int vis_miles;
+    int uv;
+    int gust_mph;
+    int gust_kph;
 };
 
 struct weatherResponseData {

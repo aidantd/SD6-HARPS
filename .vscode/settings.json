@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.port": "/dev/cu.usbserial-21240",
+  "idf.port": "/dev/cu.usbserial-1210",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
@@ -17,6 +17,15 @@
     "weatherapi.h": "c",
     "event_groups.h": "c",
     "esp_system.h": "c",
-    "esp_log.h": "c"
+    "esp_log.h": "c",
+    "esp_tls_errors.h": "c",
+    "sys.h": "c",
+    "err.h": "c",
+    "esp_wifi_types.h": "c",
+    "esp_wifi.h": "c",
+    "esp_tls.h": "c",
+    "esp_http_client.h": "c",
+    "esp_event.h": "c",
+    "cjson.h": "c"
   }
 }
