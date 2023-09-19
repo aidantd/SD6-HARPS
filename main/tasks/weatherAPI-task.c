@@ -23,10 +23,10 @@
 // External Dependencies
 
 // Declarations
-// #define ESP_WIFI_SSID "ShadowHouse5"
-// #define ESP_WIFI_PASS "BigBrainers11!!"
-#define ESP_WIFI_SSID "Aidan iPhone"
-#define ESP_WIFI_PASS "SpreadSeal"
+#define ESP_WIFI_SSID "ShadowHouse5"
+#define ESP_WIFI_PASS "BigBrainers11!!"
+// #define ESP_WIFI_SSID "Aidan iPhone"
+// #define ESP_WIFI_PASS "SpreadSeal"
 
 #define ESP_MAXIMUM_RETRY 4
 
