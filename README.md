@@ -33,7 +33,7 @@ Below is an explanation of the files in the project folder.
 │   └── peripherals/            Contains the code for the system's peripherals
 │       └── bme280.c
 │       └── bme280.h
-│   └── tasks/                  Contains the system's tasks
+│   └── tasks/                  Contains all the system's tasks
 │       └── pt-task.c
 │       └── weatherAPI-task.c
 │   └── userHAL/                Contains the code for the HAL
