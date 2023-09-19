@@ -199,9 +199,9 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
 #ifndef DEBUF
         printf("got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-#endif
-        // memcpy(systemIP, &event->ip_info.ip, 16);
         printf("\n");
+#endif
+        sprintf(systemIP, IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
