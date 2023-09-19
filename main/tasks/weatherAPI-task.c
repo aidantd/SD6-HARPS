@@ -23,10 +23,10 @@
 // External Dependencies
 
 // Declarations
-#define ESP_WIFI_SSID "ShadowHouse5"
-#define ESP_WIFI_PASS "BigBrainers11!!"
-// #define ESP_WIFI_SSID "Aidan iPhone"
-// #define ESP_WIFI_PASS "SpreadSeal"
+// #define ESP_WIFI_SSID "ShadowHouse5"
+// #define ESP_WIFI_PASS "BigBrainers11!!"
+#define ESP_WIFI_SSID "Aidan iPhone"
+#define ESP_WIFI_PASS "SpreadSeal"
 
 #define ESP_MAXIMUM_RETRY 4
 
@@ -405,10 +405,10 @@ void weatherApiTask(void* pvParameter) {
         printf("UV: %d\n", weatherData.currentWeatherData.uv);
         printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
         printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
-        printf("System IP: %s", systemIP);
+        printf("System IP: %s\n", systemIP);
         printf("*******************************************\n\n");
 #endif
 
-        vTaskDelay(3000 / portTICK_PERIOD_MS);
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
 }

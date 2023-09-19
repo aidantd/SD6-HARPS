@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.port": "/dev/cu.usbserial-21240",
+  "idf.port": "/dev/cu.usbserial-1210",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
