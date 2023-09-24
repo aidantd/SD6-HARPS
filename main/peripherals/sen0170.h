@@ -4,3 +4,5 @@
 // External Depencencies
 
 // Declarations
+
+uint32_t readSen0170(void);
