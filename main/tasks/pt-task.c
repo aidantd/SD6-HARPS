@@ -10,7 +10,6 @@
 // External Dependencies
 
 // Declarations
-#define DEBUG 1
 
 static int initializationStatus = 1;
 static int numSecondsPassed = 0;
@@ -67,8 +66,8 @@ void pt_task(void *pvParameter) {
             } else {
                 printf("Error reading from BME280: %d\n", error);
             }
-        }
 #endif
+        }
 
         memset(&bmeData, 0, sizeof(bmeData));
 

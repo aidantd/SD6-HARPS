@@ -11,7 +11,9 @@
 // Declarations
 
 // TODO: Determine if this is the correct duration
-#define SHUTTER_MOTOR_DURATION 1000 * 1000 * 3  // 3 seconds
+#define MICROSECONDS_PER_MILLISECONDS 1000
+#define MILLISECONDS_PER_SECOND 1000
+#define SHUTTER_MOTOR_DURATION (3 * MILLISECONDS_PER_SECOND * MICROSECONDS_PER_MILLISECONDS)
 
 static uint64_t shutterTimeout = 0;
 
@@ -33,15 +35,6 @@ void motor_task(void *pvParameter) {
             shutterTimeout = 0;
         }
 #ifdef DEBUG
-// if (shutterTimeout == 0) {
-//     shutterTimeout = createTimeout(1000 * 1000 * 5);  // 5 seconds
-// }
-
-// if (isTimeoutElapsed(shutterTimeout) == 1) {
-//     printf("Timeout elapsed\n");
-//     shutterTimeout = 0;
-// }
-
 // printf("Motor task\n");
 // printf("Shutter time amount: %llu\n", shutterTimeout);
 // printf("GPTimer count: %llu\n", getGPTimerCount());
