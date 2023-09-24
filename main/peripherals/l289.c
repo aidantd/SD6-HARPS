@@ -16,6 +16,7 @@
 #define M2_ENABLE
 
 static uint8_t shutterPosition = SHUTTER_STATUS_OPEN;
+static uint8_t motorRunning = false;
 
 esp_err_t initL289(void) {
     esp_err_t error = ESP_OK;
@@ -33,14 +34,18 @@ esp_err_t setMotorDirection(motorDirection_t motorDirection) {
     case FORWARD:
         error |= gpio_set_level(M2_FORWARD, 1);
         error |= gpio_set_level(M2_BACKWARD, 0);
+        motorRunning = true;
         break;
     case BACKWARD:
         error |= gpio_set_level(M2_FORWARD, 0);
         error |= gpio_set_level(M2_BACKWARD, 1);
+        motorRunning = true;
         break;
+    case STOPPED:
     default:
         error |= gpio_set_level(M2_FORWARD, 0);
         error |= gpio_set_level(M2_BACKWARD, 0);
+        motorRunning = false;
         break;
     }
 
@@ -53,4 +58,8 @@ uint8_t getShutterStatus(void) {
 
 void setShutterStatus(uint8_t shutterStatus) {
     shutterPosition = shutterStatus;
+}
+
+uint8_t isMotorActive(void) {
+    return motorRunning;
 }
