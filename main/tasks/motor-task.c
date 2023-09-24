@@ -18,7 +18,7 @@ static uint64_t shutterTimeout = 0;
 void motor_task(void *pvParameter) {
     while (1) {
         // TODO: Implement logic to determine if the shutters need to be updated at this if statement
-        if (true == true) {
+        if (false == true) {
             if (getShutterStatus() == SHUTTER_STATUS_OPEN) {
                 // TODO: Update needToUpdateShutters to false
                 setMotorDirection(FORWARD);
