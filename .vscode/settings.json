@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.port": "/dev/cu.usbserial-1210",
+  "idf.port": "/dev/cu.usbserial-21210",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
@@ -29,6 +29,7 @@
     "cjson.h": "c",
     "stdlib.h": "c",
     "adc.h": "c",
-    "sen0170.h": "c"
+    "sen0170.h": "c",
+    "ping_sock.h": "c"
   }
 }

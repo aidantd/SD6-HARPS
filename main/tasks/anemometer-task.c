@@ -12,6 +12,10 @@
 
 static uint32_t lastRecordedWindSpeed = 0;
 
+uint32_t getLastRecordedWindSpeed() {
+    return lastRecordedWindSpeed;
+}
+
 void anemometerTask(void* pvParameter) {
     while (1) {
         lastRecordedWindSpeed = readSen0170();
