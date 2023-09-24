@@ -14,7 +14,7 @@ static uint32_t calculateWindSpeed(uint32_t readVoltage) {
 // Reads in the recorded voltage from the anemometer and converts it to a wind speed
 uint32_t readSen0170(void) {
     uint32_t readVoltage = 0;
-    readVoltage = readAdc(ADC_SEN0170);
+    readVoltage = readADC(ADC_SEN0170);
 
     return calculateWindSpeed(readVoltage);
 }
