@@ -35,11 +35,13 @@ esp_err_t setMotorDirection(motorDirection_t motorDirection) {
         error |= gpio_set_level(M2_FORWARD, 1);
         error |= gpio_set_level(M2_BACKWARD, 0);
         motorRunning = true;
+        shutterPosition = SHUTTER_STATUS_CLOSED;
         break;
     case BACKWARD:
         error |= gpio_set_level(M2_FORWARD, 0);
         error |= gpio_set_level(M2_BACKWARD, 1);
         motorRunning = true;
+        shutterPosition = SHUTTER_STATUS_OPEN;
         break;
     case STOPPED:
     default:
