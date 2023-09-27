@@ -1,9 +1,12 @@
 idf_component_register(SRCS "main.c" 
                         "peripherals/bme280.c"
+                        "peripherals/l289.c"
                         "peripherals/sen0170.c"
-                        "tasks/weatherAPI-task.c"
                         "tasks/pt-task.c"
+                        "tasks/weatherAPI-task.c"
+                        "tasks/motor-task.c"
                         "userHal/i2c.c"
                         "userHal/uart.c"
                         "userHal/adc.c"
+                        "utility/timers/timers.c"
                         INCLUDE_DIRS ".")

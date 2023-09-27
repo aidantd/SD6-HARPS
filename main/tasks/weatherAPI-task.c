@@ -18,15 +18,15 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "nvs_flash.h"
-#include "utility/weatherAPI.h"
+#include "utility/api/weatherAPI.h"
 
 // External Dependencies
 
 // Declarations
-// #define ESP_WIFI_SSID "ShadowHouse5"
-// #define ESP_WIFI_PASS "BigBrainers11!!"
-#define ESP_WIFI_SSID "Aidan iPhone"
-#define ESP_WIFI_PASS "SpreadSeal"
+#define ESP_WIFI_SSID "ShadowHouse5"
+#define ESP_WIFI_PASS "BigBrainers11!!"
+// #define ESP_WIFI_SSID "Aidan iPhone"
+// #define ESP_WIFI_PASS "SpreadSeal"
 
 #define ESP_MAXIMUM_RETRY 4
 
