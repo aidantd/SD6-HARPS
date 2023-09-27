@@ -3,6 +3,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "userHAL/adc.h"
 #include "userHAL/i2c.h"
 #include "userHAL/uart.h"
 #include "utility/timers/timers.h"
@@ -22,6 +23,8 @@ esp_err_t boardInit(void) {
     error |= i2c_master_init();
 
     error |= uart_master_init();
+
+    error |= configureADC();
 
     error |= wifi_init();
 

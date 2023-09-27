@@ -2,6 +2,7 @@
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
   "idf.port": "/dev/cu.usbserial-21210",
+  "idf.port": "/dev/cu.usbserial-21210",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
@@ -27,6 +28,10 @@
     "esp_http_client.h": "c",
     "esp_event.h": "c",
     "cjson.h": "c",
+    "stdlib.h": "c",
+    "adc.h": "c",
+    "sen0170.h": "c",
+    "ping_sock.h": "c",
     "gpio.h": "c",
     "mcpwm_periph.h": "c",
     "mcpwm.h": "c",
