@@ -21,6 +21,7 @@ static uint32_t humidity;
 
 // ********************************************************************************
 // Gets the last recorded temperature
+// @return: Temperature in degrees Celsius
 // ********************************************************************************
 uint32_t getTemperature(void) {
     return temperature;
@@ -28,6 +29,7 @@ uint32_t getTemperature(void) {
 
 // ********************************************************************************
 // Gets the last recorded pressure
+// @return: Pressure in Pascals
 // ********************************************************************************
 uint32_t getPressure(void) {
     return pressure;
@@ -35,6 +37,7 @@ uint32_t getPressure(void) {
 
 // ********************************************************************************
 // Gets the last recorded humidity
+// @return: Humidity in %RH
 // ********************************************************************************
 uint32_t getHumidity(void) {
     return humidity;
