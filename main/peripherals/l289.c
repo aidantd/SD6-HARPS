@@ -11,13 +11,11 @@
 #define M2_FORWARD GPIO_NUM_17
 #define M2_BACKWARD GPIO_NUM_13
 
-// Currently the enable pins are not configurable by the chip unless we skyhook a wire
-#define M1_ENABLE
-#define M2_ENABLE
-
 static uint8_t shutterPosition = SHUTTER_STATUS_OPEN;
 static uint8_t motorRunning = false;
 
+// ********************************************************************************
+// ********************************************************************************
 esp_err_t initL289(void) {
     esp_err_t error = ESP_OK;
 
@@ -27,6 +25,8 @@ esp_err_t initL289(void) {
     return error;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 esp_err_t setMotorDirection(motorDirection_t motorDirection) {
     esp_err_t error = ESP_OK;
 
@@ -54,14 +54,20 @@ esp_err_t setMotorDirection(motorDirection_t motorDirection) {
     return error;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 uint8_t getShutterStatus(void) {
     return shutterPosition;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 void setShutterStatus(uint8_t shutterStatus) {
     shutterPosition = shutterStatus;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 uint8_t isMotorActive(void) {
     return motorRunning;
 }

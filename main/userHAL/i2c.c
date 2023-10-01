@@ -10,6 +10,8 @@
 #define DEV_BOARD
 #define I2C_BUFFER_SIZE 1024
 
+// ********************************************************************************
+// ********************************************************************************
 esp_err_t i2c_master_init(void) {
     int i2c_master_port = I2C_NUM_0;
 
@@ -28,6 +30,8 @@ esp_err_t i2c_master_init(void) {
     return i2c_driver_install(i2c_master_port, configuration.mode, DISABLE_MASTER_RX_BUFFER, DISABLE_MASTER_TX_BUFFER, 0);
 }
 
+// ********************************************************************************
+// ********************************************************************************
 esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, uint8_t registerAddress, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create();
 
@@ -45,6 +49,8 @@ esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, uint8_t regi
     return error;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, uint8_t registerAddress, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create();
 

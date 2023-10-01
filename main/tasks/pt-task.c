@@ -11,26 +11,34 @@
 
 // Declarations
 
-static int initializationStatus = 1;
-static int numSecondsPassed = 0;
+static int initializationStatus = true;
+static int numSecondsPassed;
 
 static struct registerCalibrationMapBME calibrationData;
 static uint32_t temperature;
 static uint32_t pressure;
 static uint32_t humidity;
 
+// ********************************************************************************
+// ********************************************************************************
 uint32_t getTemperature(void) {
     return temperature;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 uint32_t getPressure(void) {
     return pressure;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 uint32_t getHumidity(void) {
     return humidity;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 void pt_task(void *pvParameter) {
     while (1) {
         esp_err_t error = ESP_OK;

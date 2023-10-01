@@ -17,6 +17,8 @@
 
 static uint64_t shutterTimeout = 0;
 
+// ********************************************************************************
+// ********************************************************************************
 void motor_task(void *pvParameter) {
     while (1) {
         // TODO: Implement logic (needToUpdateShutters) to determine if the shutters need to be updated at this if statement
@@ -35,9 +37,9 @@ void motor_task(void *pvParameter) {
             shutterTimeout = 0;
         }
 #ifdef DEBUG
-// printf("Motor task\n");
-// printf("Shutter time amount: %llu\n", shutterTimeout);
-// printf("GPTimer count: %llu\n", getGPTimerCount());
+        printf("Motor task\n");
+        printf("Shutter time amount: %llu\n", shutterTimeout);
+        printf("GPTimer count: %llu\n", getGPTimerCount());
 #endif
 
         vTaskDelay(200 / portTICK_PERIOD_MS);

@@ -10,6 +10,8 @@
 
 static int32_t temperature_fine;
 
+// ********************************************************************************
+// ********************************************************************************
 esp_err_t readFromBME(uint8_t *buffer, uint8_t registerAddress, size_t size) {
     return i2c_read_from_device(BME280_ADDRESS, buffer, registerAddress, size);
 }

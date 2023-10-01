@@ -10,17 +10,21 @@
 
 // Declarations
 
-static uint32_t lastRecordedWindSpeed = 0;
+static uint32_t lastRecordedWindSpeed;
 
+// ********************************************************************************
+// ********************************************************************************
 uint32_t getLastRecordedWindSpeed() {
     return lastRecordedWindSpeed;
 }
 
+// ********************************************************************************
+// ********************************************************************************
 void anemometerTask(void* pvParameter) {
     while (1) {
         lastRecordedWindSpeed = readSen0170();
 
-#ifndef DEBUG
+#ifdef DEBUG
         printf("Wind Speed: %ld\n", lastRecordedWindSpeed);
 #endif
         vTaskDelay(10000 / portTICK_PERIOD_MS);
