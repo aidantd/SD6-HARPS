@@ -51,7 +51,7 @@ Below is an explanation of the files in the project folder.
 │       └── api/                    Contains the code for interfacing with external APIs
 │           └── geolocationAPI.h
 │           └── weatherAPI.h
-│       └── timers/                Contains the code for the system's timers
+│       └── timers/                 Contains the code for the system's timers
 │           └── timers.c
 │           └── timers.h
 └── README.md 
