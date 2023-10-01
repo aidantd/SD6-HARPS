@@ -7,6 +7,10 @@
 #define SYSTEM_BAUD_RATE 115200
 #define READ_WAIT_TIME 250
 
+// ********************************************************************************
+// Initializes the UART master
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
+// ********************************************************************************
 esp_err_t uart_master_init(void) {
     esp_err_t error = ESP_OK;
     const uart_port_t uart_num = UART_NUM_0;
@@ -28,10 +32,22 @@ esp_err_t uart_master_init(void) {
     return error;
 }
 
+// ********************************************************************************
+// Writes to the UART line
+// @param data: Data to write to the UART line
+// @param size: Size of the data to write
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
+// ********************************************************************************
 esp_err_t uart_write_to_line(uint8_t *data, size_t size) {
     return uart_write_bytes(UART_NUM_0, (const char *)data, size);
 }
 
+// ********************************************************************************
+// Reads from the UART line
+// @param buffer: Buffer to read from the UART line
+// @param size: Size of the data to read
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
+// ********************************************************************************
 esp_err_t uart_read_from_line(uint8_t *buffer, size_t size) {
     return uart_read_bytes(UART_NUM_0, buffer, size, READ_WAIT_TIME);
 }

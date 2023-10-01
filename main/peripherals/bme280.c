@@ -10,22 +10,48 @@
 
 static int32_t temperature_fine;
 
+// ********************************************************************************
+// Reads from the BME280 sensor starting at the given register address for the given size
+// @param buffer: The buffer to store the read register data
+// @param registerAddress: The register address to start reading from
+// @param size: The number of bytes to read
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
+// ********************************************************************************
 esp_err_t readFromBME(uint8_t *buffer, uint8_t registerAddress, size_t size) {
     return i2c_read_from_device(BME280_ADDRESS, buffer, registerAddress, size);
 }
 
+// ********************************************************************************
+// Writes to the BME280 sensor starting at the given register address for the given size
+// @param data: The data to write to the register
+// @param registerAddress: The register address to start writing to
+// @param size: The number of bytes to write
+// ********************************************************************************
 esp_err_t writeToBME(uint8_t *data, uint8_t registerAddress, size_t size) {
     return i2c_write_to_device(BME280_ADDRESS, data, registerAddress, size);
 }
 
+// ********************************************************************************
+// Initializes the BME280 sensor with the given configuration settings
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
+// ********************************************************************************
 esp_err_t bme280_init(void) {
     uint8_t writeDataConfig = CONFIG_STANDBY_TIME_62_MS | CONFIG_FILTER_COEFFICIENT_8 | CONFIG_SPI_DISABLE;
 
     return writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
 }
 
-// Returns the temperature in degrees Celsius as a scaled whole number.
-// For example, an output of 5123 represents 51.23 degrees Celsius.
+// ********************************************************************************
+// Calculates the temperature read from the BME280 sensor
+// @param calibrationData: The calibration data read from the BME280 sensor
+// @param temperatureMSB: The most significant byte of the temperature data register
+// @param temperatureLSB: The least significant byte of the temperature data register
+// @param temperatureXLSB: The extra least significant byte of the temperature data register
+// @return: The temperature in degrees Celsius as a scaled whole number
+// NOTE:
+//      - Returns the temperature in degrees Celsius as a scaled whole number.
+//          - For example, an output of 5123 represents 51.23 degrees Celsius.
+// ********************************************************************************
 int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
     int32_t temperature32_t = (temperatureMSB << 12) | (temperatureLSB << 4) | (temperatureXLSB >> 4);
 
@@ -39,8 +65,17 @@ int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, u
     return temperature;
 }
 
-// Returns the pressure in Pascals as a 32-bit unsigned integer in Q24.8 format (24 integer bits and 8 fractional bits).
-// For example, an output of 24674867 represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
+// ********************************************************************************
+// Calculates the pressure read from the BME280 sensor
+// @param calibrationData: The calibration data read from the BME280 sensor
+// @param pressureMSB: The most significant byte of the pressure data register
+// @param pressureLSB: The least significant byte of the pressure data register
+// @param pressureXLSB: The extra least significant byte of the pressure data register
+// @return: The pressure in Pascals as a 32-bit unsigned integer in Q24.8 format
+// NOTE:
+//      - Returns the pressure in Pascals as a 32-bit unsigned integer in Q24.8 format (24 integer bits and 8 fractional bits).
+//          - For example, an output of 24674867 represents 24674867/256 = 96386.2 Pa = 963.862 hPa
+// ********************************************************************************
 uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB) {
     int32_t pressure32_t = (pressureMSB << 12) | (pressureLSB << 4) | (pressureXLSB >> 4);
 
@@ -65,9 +100,17 @@ uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uin
     return (uint32_t)pressure;
 }
 
-// Returns the humidity in %RH as an unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
-// For example, an output of 47445 represents 47445/1024 = 46.333 %RH.
-// Note: Some crazy math is going on here so may want to quadruple check later
+// ********************************************************************************
+// Calculates the humidity read from the BME280 sensor
+// @param calibrationData: The calibration data read from the BME280 sensor
+// @param humidityMSB: The most significant byte of the humidity data register
+// @param humidityLSB: The least significant byte of the humidity data register
+// @return: The humidity in %RH as an unsigned 32 bit integer in Q22.10 format
+// NOTE:
+//      - Returns the humidity in %RH as an unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
+//          - For example, an output of 47445 represents 47445/1024 = 46.333 %RH.
+//      - Some crazy math is going on here so may want to quadruple check later
+// ********************************************************************************
 uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB) {
     int32_t humidity32_t = (humidityMSB << 8) | humidityLSB;
 
