@@ -25,20 +25,35 @@ Below is an explanation of the files in the project folder.
 
 ```
 ├── CMakeLists.txt
-├── main/
+├── main/                           Contains the code for the system's firmware
 │   └── CMakeLists.txt
 │   └── main.c
-│   └── peripherals/            Contains the code for the system's peripherals
+│   └── peripherals/                Contains the code for the system's peripherals
 │       └── bme280.c
 │       └── bme280.h
-│   └── tasks/                  Contains the system's tasks
-│       └── basicTask.c
+│       └── l289.c
+│       └── l289.h
+│       └── sen0170.c
+│       └── sen0170.h
+│   └── tasks/                      Contains the system's tasks
+│       └── anemometer-task.c
+│       └── motor-task.c
 │       └── pt-task.c
-│   └── userHAL/                Contains the code for the HAL
+│       └── weatherAPI-task.c
+│   └── userHAL/                    Contains the code for the HAL
+│       └── adc.c
+│       └── adc.h
 │       └── i2c.c
 │       └── i2c.h
 │       └── uart.c
 │       └── uart.h
+│   └── utility/                    Contains the code for the system's utility functions
+│       └── api/                    Contains the code for interfacing with external APIs
+│           └── geolocationAPI.h
+│           └── weatherAPI.h
+│       └── timers/                Contains the code for the system's timers
+│           └── timers.c
+│           └── timers.h
 └── README.md 
 ```
 
