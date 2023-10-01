@@ -7,6 +7,8 @@
 static esp_adc_cal_characteristics_t adc1_chars;
 
 // ********************************************************************************
+// Configures ADC1 to read with the given settings
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t configureADC(void) {
     esp_err_t error = ESP_OK;
@@ -20,6 +22,9 @@ esp_err_t configureADC(void) {
 }
 
 // ********************************************************************************
+// Reads from the given ADC1 channel
+// @param channel: ADC1 channel to read from
+// @return: ADC reading
 // ********************************************************************************
 uint32_t readADC(adc1_channel_t channel) {
     return esp_adc_cal_raw_to_voltage(adc1_get_raw(channel), &adc1_chars);

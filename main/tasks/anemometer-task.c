@@ -13,6 +13,8 @@
 static uint32_t lastRecordedWindSpeed;
 
 // ********************************************************************************
+// Gets the last recorded wind speed
+// @return: The last recorded wind speed as a 32-bit unsigned integer
 // ********************************************************************************
 uint32_t getLastRecordedWindSpeed() {
     return lastRecordedWindSpeed;

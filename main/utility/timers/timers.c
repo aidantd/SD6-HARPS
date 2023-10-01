@@ -7,6 +7,8 @@
 gptimer_handle_t gptimer = NULL;
 
 // ********************************************************************************
+// Initializes the general purpose timer
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t initGPTimer(void) {
     esp_err_t error = ESP_OK;
@@ -28,6 +30,8 @@ esp_err_t initGPTimer(void) {
 }
 
 // ********************************************************************************
+// Gets the current count of the general purpose timer
+// @return: Current count of the general purpose timer
 // ********************************************************************************
 uint64_t getGPTimerCount(void) {
     uint64_t count = 0;
@@ -38,12 +42,18 @@ uint64_t getGPTimerCount(void) {
 }
 
 // ********************************************************************************
+// Creates a timeout for the given timer length based on the current timer count
+// @param timerLength: Length of the timer
+// @return: Timeout value
 // ********************************************************************************
 uint64_t createTimeout(uint64_t timerLength) {
     return getGPTimerCount() + timerLength;
 }
 
 // ********************************************************************************
+// Checks if the given timeout has elapsed
+// @param timeout: Timeout to check
+// @return: 1 if timeout has elapsed, 0 if timeout has not elapsed
 // ********************************************************************************
 uint8_t isTimeoutElapsed(uint64_t timeout) {
     if (getGPTimerCount() >= timeout) {

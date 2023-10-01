@@ -11,6 +11,8 @@
 #define I2C_BUFFER_SIZE 1024
 
 // ********************************************************************************
+// Initializes the I2C master
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t i2c_master_init(void) {
     int i2c_master_port = I2C_NUM_0;
@@ -31,6 +33,12 @@ esp_err_t i2c_master_init(void) {
 }
 
 // ********************************************************************************
+// Writes to the given device over I2C
+// @param deviceAddress: Address of the device to write to
+// @param data: Data to write to the device
+// @param registerAddress: Register address to write to
+// @param size: Size of the data to write
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, uint8_t registerAddress, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create();
@@ -50,6 +58,12 @@ esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, uint8_t regi
 }
 
 // ********************************************************************************
+// Reads from the given device over I2C
+// @param deviceAddress: Address of the device to read from
+// @param buffer: Buffer to store the read data in
+// @param registerAddress: Register address to read from
+// @param size: Size of the data to read
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, uint8_t registerAddress, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create();

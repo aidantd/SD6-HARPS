@@ -15,6 +15,8 @@ static uint8_t shutterPosition = SHUTTER_STATUS_OPEN;
 static uint8_t motorRunning = false;
 
 // ********************************************************************************
+// Initializes the L289 motor driver
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t initL289(void) {
     esp_err_t error = ESP_OK;
@@ -26,6 +28,9 @@ esp_err_t initL289(void) {
 }
 
 // ********************************************************************************
+// Sets the direction of the motor and starts the motor
+// @param motorDirection: The direction to set the motor to
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t setMotorDirection(motorDirection_t motorDirection) {
     esp_err_t error = ESP_OK;
@@ -55,18 +60,24 @@ esp_err_t setMotorDirection(motorDirection_t motorDirection) {
 }
 
 // ********************************************************************************
+// Gets the current shutter status
+// @return: The current shutter status
 // ********************************************************************************
 uint8_t getShutterStatus(void) {
     return shutterPosition;
 }
 
 // ********************************************************************************
+// Sets the current shutter status
+// @param shutterStatus: The shutter status to set
 // ********************************************************************************
 void setShutterStatus(uint8_t shutterStatus) {
     shutterPosition = shutterStatus;
 }
 
 // ********************************************************************************
+// Gets whether or not the motor is currently active
+// @return: Whether or not the motor is currently active
 // ********************************************************************************
 uint8_t isMotorActive(void) {
     return motorRunning;

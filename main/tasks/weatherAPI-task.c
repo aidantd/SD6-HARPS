@@ -53,6 +53,8 @@ static struct weatherResponseData weatherData;
 static char systemIP[16];
 
 // ********************************************************************************
+// Parses the JSON response received from the weather API
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 static esp_err_t parseJsonResponse(void) {
     if (jsonResponse[0] == '\0') {
@@ -146,6 +148,12 @@ static esp_err_t parseJsonResponse(void) {
 }
 
 // ********************************************************************************
+// Sets up the WiFi connection to the access point and handles the WiFi events for
+// the status of the connection
+// @param arg: The argument passed to the event handler
+// @param event_base: The event base passed to the event handler
+// @param event_id: The event ID passed to the event handler
+// @param event_data: The event data passed to the event handler
 // ********************************************************************************
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
@@ -172,6 +180,9 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 }
 
 // ********************************************************************************
+// Handles the HTTP events for the status of the connection
+// @param evt: The event passed to the event handler
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
     switch (evt->event_id) {
@@ -235,6 +246,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
 }
 
 // ********************************************************************************
+// Initializes the WiFi connection to the access point
 // ********************************************************************************
 esp_err_t wifi_init(void) {
     esp_err_t ret = nvs_flash_init();
@@ -308,8 +320,11 @@ esp_err_t wifi_init(void) {
 }
 
 // ********************************************************************************
+// Sets up the HTTP client configuration and performs the HTTP GET request to an
+// external API
 // ********************************************************************************
 static void http_rest_with_url(void) {
+    // Configures the HTTP client and sets the URL and event handler
     esp_http_client_config_t config = {
         .url = WEATHER_API_URL,
         .event_handler = _http_event_handler,
@@ -331,6 +346,8 @@ static void http_rest_with_url(void) {
 
 #ifdef DEBUG
 // ********************************************************************************
+// Prints the JSON response in a formatted output
+// @param json: The JSON response to print
 // ********************************************************************************
 void printJsonFormatted(const char* json) {
     if (json == NULL || json[0] == '\0') {
