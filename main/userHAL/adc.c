@@ -13,7 +13,7 @@ static esp_adc_cal_characteristics_t adc1_chars;
 esp_err_t configureADC(void) {
     esp_err_t error = ESP_OK;
 
-    error |= esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_DEFAULT, 0, &adc1_chars);
+    error |= esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_2_5, ADC_WIDTH_BIT_DEFAULT, 0, &adc1_chars);
 
     ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_DEFAULT));
     ESP_ERROR_CHECK(adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11));
@@ -27,5 +27,10 @@ esp_err_t configureADC(void) {
 // @return: ADC reading
 // ********************************************************************************
 uint32_t readADC(adc1_channel_t channel) {
+    // printf("Vref: %ld\n", adc1_chars.vref);
+    // printf("ADC Num: %d\n", adc1_chars.adc_num);
+    // printf("Atten: %d\n", adc1_chars.atten);
+    // printf("Bit Width: %d\n", adc1_chars.bit_width);
+
     return esp_adc_cal_raw_to_voltage(adc1_get_raw(channel), &adc1_chars);
 }

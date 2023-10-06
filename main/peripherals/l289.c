@@ -41,21 +41,31 @@ esp_err_t setMotorDirection(motorDirection_t motorDirection) {
         error |= gpio_set_level(M2_BACKWARD, 0);
         motorRunning = true;
         shutterPosition = SHUTTER_STATUS_CLOSED;
+        printf("Motor direction set to forward\n");
+        printf("M2_FORWARD: %d\n", gpio_get_level(M2_FORWARD));
+        printf("M2_BACKWARD: %d\n", gpio_get_level(M2_BACKWARD));
         break;
     case BACKWARD:
         error |= gpio_set_level(M2_FORWARD, 0);
         error |= gpio_set_level(M2_BACKWARD, 1);
         motorRunning = true;
         shutterPosition = SHUTTER_STATUS_OPEN;
+        printf("Motor direction set to backward\n");
+        printf("M2_FORWARD: %d\n", gpio_get_level(M2_FORWARD));
+        printf("M2_BACKWARD: %d\n", gpio_get_level(M2_BACKWARD));
         break;
     case STOPPED:
     default:
         error |= gpio_set_level(M2_FORWARD, 0);
         error |= gpio_set_level(M2_BACKWARD, 0);
         motorRunning = false;
+        printf("Motor direction set to stopped\n");
+        printf("M2_FORWARD: %d\n", gpio_get_level(M2_FORWARD));
+        printf("M2_BACKWARD: %d\n", gpio_get_level(M2_BACKWARD));
         break;
     }
 
+    printf("Error: %d\n", error);
     return error;
 }
 

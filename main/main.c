@@ -3,6 +3,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "peripherals/l289.h"
 #include "userHAL/adc.h"
 #include "userHAL/i2c.h"
 #include "userHAL/uart.h"
@@ -12,6 +13,7 @@
 extern void weatherApiTask(void* pvParameter);
 extern void pt_task(void* pvParameter);
 extern void motor_task(void* pvParameter);
+extern void anemometerTask(void* pvParameter);
 
 extern esp_err_t wifi_init(void);
 
@@ -30,6 +32,8 @@ esp_err_t boardInit(void) {
 
     error |= initGPTimer();
 
+    error |= initL289();
+
     return error;
 }
 
@@ -44,5 +48,6 @@ void app_main(void) {
 
     xTaskCreate(&pt_task, "pt_task", 2048, NULL, 5, NULL);
     xTaskCreate(&weatherApiTask, "weatherAPI", 4096, NULL, 5, NULL);
-    xTaskCreate(&motor_task, "motor_task", 1024, NULL, 5, NULL);
+    xTaskCreate(&motor_task, "motor_task", 2048, NULL, 5, NULL);
+    xTaskCreate(&anemometerTask, "anemometer_task", 2048, NULL, 5, NULL);
 }
