@@ -42,6 +42,10 @@
     "l289.h": "c",
     "timers.h": "c",
     "mcpwm_private.h": "c",
-    "esp_adc_cal.h": "c"
+    "esp_adc_cal.h": "c",
+    "speaker.h": "c",
+    "dac_oneshot.h": "c",
+    "dac.h": "c",
+    "dac_types.h": "c"
   }
 }
