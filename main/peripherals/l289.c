@@ -21,8 +21,24 @@ static uint8_t motorRunning = false;
 esp_err_t initL289(void) {
     esp_err_t error = ESP_OK;
 
-    error |= gpio_set_direction(M2_FORWARD, GPIO_MODE_OUTPUT);
-    error |= gpio_set_direction(M2_BACKWARD, GPIO_MODE_OUTPUT);
+    gpio_config_t gpioConf = {
+        .pin_bit_mask = (1ULL << M2_FORWARD),
+        .mode = GPIO_MODE_OUTPUT,
+        .intr_type = GPIO_INTR_DISABLE,
+        .pull_down_en = 0,
+        .pull_up_en = 1,
+    };
+    error = gpio_config(&gpioConf);
+
+    gpio_config_t gpioConf2 = {
+        .pin_bit_mask = (1ULL << M2_BACKWARD),
+        .mode = GPIO_MODE_OUTPUT,
+        .intr_type = GPIO_INTR_DISABLE,
+        .pull_down_en = 0,
+        .pull_up_en = 1,
+    };
+
+    error = gpio_config(&gpioConf2);
 
     return error;
 }

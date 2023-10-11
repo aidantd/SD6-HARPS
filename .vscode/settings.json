@@ -1,8 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.port": "/dev/cu.usbserial-21210",
-  "idf.port": "/dev/cu.usbserial-21210",
+  "idf.port": "/dev/cu.usbserial-0001",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
@@ -42,6 +41,7 @@
     "algorithm": "c",
     "l289.h": "c",
     "timers.h": "c",
-    "mcpwm_private.h": "c"
+    "mcpwm_private.h": "c",
+    "esp_adc_cal.h": "c"
   }
 }
