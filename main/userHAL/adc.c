@@ -27,9 +27,5 @@ esp_err_t configureADC(void) {
 // @return: ADC reading
 // ********************************************************************************
 uint32_t readADC(adc1_channel_t channel) {
-    // printf("Vref: %ld\n", adc1_chars.vref);
-    // printf("ADC Num: %d\n", adc1_chars.adc_num);
-    // printf("Atten: %d\n", adc1_chars.atten);
-    // printf("Bit Width: %d\n", adc1_chars.bit_width);
     return esp_adc_cal_raw_to_voltage(adc1_get_raw(channel), &adc1_chars);
 }
