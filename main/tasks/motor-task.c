@@ -32,7 +32,7 @@ void motorTask(void *pvParameter) {
                 setMotorDirection(FORWARD);
                 setNeedToUpdateShutterPosition(false);
                 shutterTimeout = createTimeout(SHUTTER_MOTOR_DURATION);
-#ifndef DEBUG
+#ifdef DEBUG
                 printf("Motor direction set to forward and speaker turned on\n");
 #endif
             } else if (getShutterStatus() == SHUTTER_STATUS_CLOSED) {
@@ -52,7 +52,7 @@ void motorTask(void *pvParameter) {
             printf("Motor direction set to stopped\n");
 #endif
         }
-#ifndef DEBUG
+#ifdef DEBUG
         printf("Motor task\n");
         printf("Shutter time amount: %llu\n", shutterTimeout);
         printf("GPTimer count: %llu\n", getGPTimerCount());
