@@ -394,54 +394,57 @@ void printJsonFormatted(const char* json) {
 // ********************************************************************************
 void weatherApiTask(void* pvParameter) {
     while (1) {
-        http_rest_with_url();
+        if (xEventGroupGetBits(s_wifi_event_group) != WIFI_CONNECTED_BIT) {
+            wifi_init();
+        } else {
+            http_rest_with_url();
 
 #ifdef DEBUG
-        printf("\n\n*******************************************\n");
-        // printJsonFormatted(jsonResponse);
-        printf("%s\n", jsonResponse);
-        printf("*******************************************\n\n");
+            printf("\n\n*******************************************\n");
+            // printJsonFormatted(jsonResponse);
+            printf("%s\n", jsonResponse);
+            printf("*******************************************\n\n");
 #endif
 
-        parseJsonResponse();
+            parseJsonResponse();
 
 #ifdef DEBUG
-        printf("\n\n*******************************************\n");
-        printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
-        printf("Latitude: %d\n", weatherData.locationData.lat);
-        printf("Longitude: %d\n", weatherData.locationData.lon);
-        printf("Timezone ID: %s\n", weatherData.locationData.tz_id);
-        printf("Local Time: %s\n", weatherData.locationData.localtime);
-        printf("Local Time Epoch: %d\n", weatherData.locationData.localtime_epoch);
-        printf("Last Updated: %s\n", weatherData.currentWeatherData.last_updated);
-        printf("Last Updated Epoch: %d\n", weatherData.currentWeatherData.last_updated_epoch);
-        printf("Temperature (C): %d\n", weatherData.currentWeatherData.temp_c);
-        printf("Temperature (F): %d\n", weatherData.currentWeatherData.temp_f);
-        printf("Is Day: %d\n", weatherData.currentWeatherData.is_day);
-        printf("Condition: %s\n", weatherData.currentWeatherData.conditionData.text);
-        printf("Condition Icon: %s\n", weatherData.currentWeatherData.conditionData.icon);
-        printf("Condition Code: %d\n", weatherData.currentWeatherData.conditionData.code);
-        printf("Wind Speed (mph): %d\n", weatherData.currentWeatherData.wind_mph);
-        printf("Wind Speed (kph): %d\n", weatherData.currentWeatherData.wind_kph);
-        printf("Wind Degree: %d\n", weatherData.currentWeatherData.wind_degree);
-        printf("Wind Direction: %s\n", weatherData.currentWeatherData.wind_dir);
-        printf("Pressure (mb): %d\n", weatherData.currentWeatherData.pressure_mb);
-        printf("Pressure (in): %d\n", weatherData.currentWeatherData.pressure_in);
-        printf("Precipitation (mm): %d\n", weatherData.currentWeatherData.precip_mm);
-        printf("Precipitation (in): %d\n", weatherData.currentWeatherData.precip_in);
-        printf("Humidity: %d\n", weatherData.currentWeatherData.humidity);
-        printf("Cloud: %d\n", weatherData.currentWeatherData.cloud);
-        printf("Feels Like (C): %d\n", weatherData.currentWeatherData.feelslike_c);
-        printf("Feels Like (F): %d\n", weatherData.currentWeatherData.feelslike_f);
-        printf("Visibility (km): %d\n", weatherData.currentWeatherData.vis_km);
-        printf("Visibility (miles): %d\n", weatherData.currentWeatherData.vis_miles);
-        printf("UV: %d\n", weatherData.currentWeatherData.uv);
-        printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
-        printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
-        printf("System IP: %s\n", systemIP);
-        printf("*******************************************\n\n");
+            printf("\n\n*******************************************\n");
+            printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
+            printf("Latitude: %d\n", weatherData.locationData.lat);
+            printf("Longitude: %d\n", weatherData.locationData.lon);
+            printf("Timezone ID: %s\n", weatherData.locationData.tz_id);
+            printf("Local Time: %s\n", weatherData.locationData.localtime);
+            printf("Local Time Epoch: %d\n", weatherData.locationData.localtime_epoch);
+            printf("Last Updated: %s\n", weatherData.currentWeatherData.last_updated);
+            printf("Last Updated Epoch: %d\n", weatherData.currentWeatherData.last_updated_epoch);
+            printf("Temperature (C): %d\n", weatherData.currentWeatherData.temp_c);
+            printf("Temperature (F): %d\n", weatherData.currentWeatherData.temp_f);
+            printf("Is Day: %d\n", weatherData.currentWeatherData.is_day);
+            printf("Condition: %s\n", weatherData.currentWeatherData.conditionData.text);
+            printf("Condition Icon: %s\n", weatherData.currentWeatherData.conditionData.icon);
+            printf("Condition Code: %d\n", weatherData.currentWeatherData.conditionData.code);
+            printf("Wind Speed (mph): %d\n", weatherData.currentWeatherData.wind_mph);
+            printf("Wind Speed (kph): %d\n", weatherData.currentWeatherData.wind_kph);
+            printf("Wind Degree: %d\n", weatherData.currentWeatherData.wind_degree);
+            printf("Wind Direction: %s\n", weatherData.currentWeatherData.wind_dir);
+            printf("Pressure (mb): %d\n", weatherData.currentWeatherData.pressure_mb);
+            printf("Pressure (in): %d\n", weatherData.currentWeatherData.pressure_in);
+            printf("Precipitation (mm): %d\n", weatherData.currentWeatherData.precip_mm);
+            printf("Precipitation (in): %d\n", weatherData.currentWeatherData.precip_in);
+            printf("Humidity: %d\n", weatherData.currentWeatherData.humidity);
+            printf("Cloud: %d\n", weatherData.currentWeatherData.cloud);
+            printf("Feels Like (C): %d\n", weatherData.currentWeatherData.feelslike_c);
+            printf("Feels Like (F): %d\n", weatherData.currentWeatherData.feelslike_f);
+            printf("Visibility (km): %d\n", weatherData.currentWeatherData.vis_km);
+            printf("Visibility (miles): %d\n", weatherData.currentWeatherData.vis_miles);
+            printf("UV: %d\n", weatherData.currentWeatherData.uv);
+            printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
+            printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
+            printf("System IP: %s\n", systemIP);
+            printf("*******************************************\n\n");
 #endif
-
+        }
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
 }

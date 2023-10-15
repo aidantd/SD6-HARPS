@@ -35,8 +35,6 @@ esp_err_t boardInit(void) {
 
     error |= initL289();
 
-    error |= wifi_init();
-
     return error;
 }
 
