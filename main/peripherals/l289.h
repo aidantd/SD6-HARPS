@@ -24,3 +24,5 @@ esp_err_t setMotorDirection(motorDirection_t motorDirection);
 uint8_t getShutterStatus(void);
 void setShutterStatus(uint8_t shutterStatus);
 uint8_t isMotorActive(void);
+uint8_t isNeedToUpdateShutterPosition(void);
+void setNeedToUpdateShutterPosition(uint8_t updateShutterStatus);

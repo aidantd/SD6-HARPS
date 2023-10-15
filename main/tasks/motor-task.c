@@ -23,15 +23,15 @@ static int speakerTest = 0;
 
 // ********************************************************************************
 // ********************************************************************************
-void motor_task(void *pvParameter) {
+void motorTask(void *pvParameter) {
     while (1) {
         // TODO: Implement logic (needToUpdateShutters) to determine if the shutters need to be updated at this if statement
-        if (1) {
-            if (speakerTest == 0) {
-                // Test the speaker
-                setDacVoltage((uint8_t[]){0, 255, 0}, 3);
-                speakerTest = 1;
-            }
+        if (isNeedToUpdateShutterPosition() == true && isMotorActive() == false) {
+            // if (speakerTest == 0) {
+            //     // Test the speaker
+            //     setDacVoltage((uint8_t[]){0, 255, 0}, 3);
+            //     speakerTest = 1;
+            // }
             if (getShutterStatus() == SHUTTER_STATUS_OPEN) {
                 // TODO: Update needToUpdateShutters to false
                 setMotorDirection(FORWARD);
