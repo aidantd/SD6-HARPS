@@ -5,6 +5,7 @@
 #include "freertos/task.h"
 #include "peripherals/l289.h"
 #include "userHAL/adc.h"
+#include "userHAL/dac.h"
 #include "userHAL/i2c.h"
 #include "userHAL/uart.h"
 #include "utility/timers/timers.h"
@@ -28,11 +29,13 @@ esp_err_t boardInit(void) {
 
     error |= configureADC();
 
-    error |= wifi_init();
+    error |= initDAC();
 
     error |= initGPTimer();
 
     error |= initL289();
+
+    error |= wifi_init();
 
     return error;
 }
