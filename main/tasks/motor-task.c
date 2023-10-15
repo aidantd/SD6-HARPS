@@ -6,6 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "peripherals/l289.h"
+#include "userHAL/dac.h"
 #include "utility/timers/timers.h"
 
 // External Dependencies
@@ -18,6 +19,7 @@
 #define SHUTTER_MOTOR_DURATION (2 * MILLISECONDS_PER_SECOND * MICROSECONDS_PER_MILLISECONDS)
 
 static uint64_t shutterTimeout = 0;
+static int speakerTest = 0;
 
 // ********************************************************************************
 // ********************************************************************************
@@ -25,6 +27,11 @@ void motor_task(void *pvParameter) {
     while (1) {
         // TODO: Implement logic (needToUpdateShutters) to determine if the shutters need to be updated at this if statement
         if (1) {
+            if (speakerTest == 0) {
+                // Test the speaker
+                setDacVoltage((uint8_t[]){0, 255, 0}, 3);
+                speakerTest = 1;
+            }
             if (getShutterStatus() == SHUTTER_STATUS_OPEN) {
                 // TODO: Update needToUpdateShutters to false
                 setMotorDirection(FORWARD);

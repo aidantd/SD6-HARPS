@@ -1,7 +1,7 @@
 // Includes
 #include <stdio.h>
 
-#include "driver/dac_oneshot.h"
+#include "driver/dac.h"
 #include "driver/gpio.h"
 #include "esp_err.h"
 
@@ -9,4 +9,4 @@
 
 // Declarations
 esp_err_t initDAC(void);
-esp_err_t setDACVoltage(uint8_t voltage);
+void setDacVoltage(uint8_t *audio_data, size_t length);
