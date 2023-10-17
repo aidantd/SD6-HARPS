@@ -10,7 +10,7 @@
 
 // static dac_continuous_handle_t dac_handle;
 
-dac_oneshot_handle_t chan0_handle;
+dac_cosine_handle_t chan0_handle;
 
 static uint32_t cnt = 1;
 
@@ -21,10 +21,17 @@ static uint32_t cnt = 1;
 esp_err_t initDAC(void) {
     esp_err_t error = ESP_OK;
 
-    dac_oneshot_config_t chan0_cfg = {
+    dac_cosine_config_t cos0_cfg = {
         .chan_id = DAC_CHAN_0,
+        .freq_hz = 1000,  // It will be covered by 8000 in the latter configuration
+        .clk_src = DAC_COSINE_CLK_SRC_DEFAULT,
+        .offset = 0,
+        .phase = DAC_COSINE_PHASE_0,
+        .atten = DAC_COSINE_ATTEN_DEFAULT,
+        .flags.force_set_freq = false,
     };
-    error |= dac_oneshot_new_channel(&chan0_cfg, &chan0_handle);
+
+    error |= dac_cosine_new_channel(&cos0_cfg, &chan0_handle);
 
     return error;
 }
@@ -35,14 +42,6 @@ esp_err_t initDAC(void) {
 // @param length: The length of the audio data
 // @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
-void setDacVoltage(uint8_t *data, size_t data_size) {
-    size_t playDuration = 0;
-
-    while (playDuration < data_size) {
-        /* Set the voltage every 100 ms */
-        ESP_ERROR_CHECK(dac_oneshot_output_voltage(chan0_handle, data[playDuration]));
-        printf("Setting speaker voltage to %X\n", data[playDuration]);
-        playDuration++;
-        vTaskDelay(400 / portTICK_PERIOD_MS);
-    }
+void startDacCosinSignal(void) {
+    dac_cosine_start(chan0_handle);
 }

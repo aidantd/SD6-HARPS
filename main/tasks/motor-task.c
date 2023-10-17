@@ -27,7 +27,7 @@ void motorTask(void *pvParameter) {
     while (1) {
         if (isNeedToUpdateShutterPosition() == true && isMotorActive() == false) {
             if (getShutterStatus() == SHUTTER_STATUS_OPEN) {
-                setDacVoltage((uint8_t *)audioTable, sizeof(audioTable));
+                startDacCosinSignal();
 
                 setMotorDirection(FORWARD);
                 setNeedToUpdateShutterPosition(false);
@@ -36,7 +36,7 @@ void motorTask(void *pvParameter) {
                 printf("Motor direction set to forward and speaker turned on\n");
 #endif
             } else if (getShutterStatus() == SHUTTER_STATUS_CLOSED) {
-                setDacVoltage((uint8_t *)audioTable, sizeof(audioTable));
+                startDacCosinSignal();
 
                 setMotorDirection(BACKWARD);
                 setNeedToUpdateShutterPosition(false);
@@ -58,6 +58,6 @@ void motorTask(void *pvParameter) {
         printf("GPTimer count: %llu\n", getGPTimerCount());
 #endif
 
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
     }
 }

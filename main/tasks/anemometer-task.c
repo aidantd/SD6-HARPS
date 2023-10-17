@@ -26,7 +26,7 @@ void anemometerTask(void* pvParameter) {
     while (1) {
         lastRecordedWindSpeedMPH = readSen0170();
 
-#ifdef DEBUG
+#ifndef DEBUG
         printf("Wind Speed: %ld\n", lastRecordedWindSpeed);
 #endif
         vTaskDelay(10000 / portTICK_PERIOD_MS);
