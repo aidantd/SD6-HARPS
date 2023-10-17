@@ -9,7 +9,7 @@
 #define M1_FORWARD GPIO_NUM_27
 #define M1_BACKWARD
 #define M2_FORWARD GPIO_NUM_17
-#define M2_BACKWARD GPIO_NUM_13
+#define M2_BACKWARD GPIO_NUM_16
 
 static uint8_t shutterPosition = SHUTTER_STATUS_OPEN;
 static uint8_t motorRunning = false;
