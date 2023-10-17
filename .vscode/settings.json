@@ -47,6 +47,7 @@
     "dac_oneshot.h": "c",
     "dac.h": "c",
     "dac_types.h": "c",
-    "dac_continuous.h": "c"
+    "dac_continuous.h": "c",
+    "stdbool.h": "c"
   }
 }

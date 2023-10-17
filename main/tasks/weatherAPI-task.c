@@ -408,7 +408,8 @@ void weatherApiTask(void* pvParameter) {
             wifiInitializationCompleted = true;
             printf("WiFi initialization completed\n");
         } else if (xEventGroupGetBits(s_wifi_event_group) != WIFI_CONNECTED_BIT) {
-            wifi_init();
+            // wifi_init();
+            esp_wifi_connect();
             printf("WiFi initialization From Failure\n");
         } else {
             printf("We good\n");
