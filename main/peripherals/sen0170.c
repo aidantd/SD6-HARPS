@@ -32,5 +32,5 @@ uint32_t readSen0170(void) {
     printf("SEN0170 Voltage: %ld\n", readVoltage);
 #endif
 
-    return calculateWindSpeed(readVoltage);
+    return readVoltage;
 }

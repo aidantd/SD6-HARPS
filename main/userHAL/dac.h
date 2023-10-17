@@ -10,3 +10,4 @@
 // Declarations
 esp_err_t initDAC(void);
 void startDacCosinSignal(void);
+void stopDacCosinSignal(void);

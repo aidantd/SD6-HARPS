@@ -37,11 +37,17 @@ esp_err_t initDAC(void) {
 }
 
 // ********************************************************************************
-// Sets the DAC output voltage to play audio
-// @param audio_data: The audio data to play
-// @param length: The length of the audio data
+// Starts the DAC output voltage
 // @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 void startDacCosinSignal(void) {
     dac_cosine_start(chan0_handle);
+}
+
+// ********************************************************************************
+// Stops the DAC output voltage
+// @return: ESP_OK if successful, ESP_FAIL if unsuccessful
+// ********************************************************************************
+void stopDacCosinSignal(void) {
+    dac_cosine_stop(chan0_handle);
 }
