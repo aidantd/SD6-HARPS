@@ -17,7 +17,7 @@
 // TODO: Determine if this is the correct duration
 #define MICROSECONDS_PER_MILLISECONDS 1000
 #define MILLISECONDS_PER_SECOND 1000
-#define SHUTTER_MOTOR_DURATION (10 * MILLISECONDS_PER_SECOND * MICROSECONDS_PER_MILLISECONDS)
+#define SHUTTER_MOTOR_DURATION (6 * MILLISECONDS_PER_SECOND * MICROSECONDS_PER_MILLISECONDS)
 
 static uint64_t shutterTimeout = 0;
 
@@ -29,8 +29,9 @@ void motorTask(void *pvParameter) {
             if (getShutterStatus() == SHUTTER_STATUS_CLOSED) {
                 startDacCosinSignal();
 
-                setMotorDirection(FORWARD);
+                setMotorDirection(BACKWARD);
                 setNeedToUpdateShutterPosition(false);
+
                 shutterTimeout = createTimeout(SHUTTER_MOTOR_DURATION);
 #ifndef DEBUG
                 printf("Motor direction set to forward and speaker turned on\n");
@@ -38,8 +39,9 @@ void motorTask(void *pvParameter) {
             } else if (getShutterStatus() == SHUTTER_STATUS_OPEN) {
                 startDacCosinSignal();
 
-                setMotorDirection(BACKWARD);
+                setMotorDirection(FORWARD);
                 setNeedToUpdateShutterPosition(false);
+
                 shutterTimeout = createTimeout(SHUTTER_MOTOR_DURATION);
 #ifndef DEBUG
                 printf("Motor direction set to backward\n");
