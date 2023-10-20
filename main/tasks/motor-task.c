@@ -33,7 +33,7 @@ void motorTask(void *pvParameter) {
                 setNeedToUpdateShutterPosition(false);
 
                 shutterTimeout = createTimeout(SHUTTER_MOTOR_DURATION);
-#ifndef DEBUG
+#ifdef DEBUG
                 printf("Motor direction set to forward and speaker turned on\n");
 #endif
             } else if (getShutterStatus() == SHUTTER_STATUS_OPEN) {
@@ -43,7 +43,7 @@ void motorTask(void *pvParameter) {
                 setNeedToUpdateShutterPosition(false);
 
                 shutterTimeout = createTimeout(SHUTTER_MOTOR_DURATION);
-#ifndef DEBUG
+#ifdef DEBUG
                 printf("Motor direction set to backward\n");
 #endif
             }
@@ -51,7 +51,7 @@ void motorTask(void *pvParameter) {
             stopDacCosinSignal();
             setMotorDirection(STOPPED);
             shutterTimeout = 0;
-#ifndef DEBUG
+#ifdef DEBUG
             printf("Motor direction set to stopped\n");
 #endif
         }

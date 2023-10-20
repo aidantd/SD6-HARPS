@@ -13,3 +13,5 @@ idf_component_register(SRCS "main.c"
                         "userHal/uart.c"
                         "utility/timers/timers.c"
                         INCLUDE_DIRS ".")
+
+# target_compile_definitions(${COMPONENT_LIB} PRIVATE DEBUG)

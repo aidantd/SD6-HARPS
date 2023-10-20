@@ -37,7 +37,7 @@ void decisionMakingTask(void *pvParameter) {
         case SHUTTER_STATUS_OPEN:
             if (lastRecordedSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {
                 setNeedToUpdateShutterPosition(true);
-#ifndef DEBUG
+#ifdef DEMO
                 printf("The computer has decided to close the shuttering system\n");
 #endif
             }
@@ -45,7 +45,7 @@ void decisionMakingTask(void *pvParameter) {
         case SHUTTER_STATUS_CLOSED:
             if (lastRecordedSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
                 setNeedToUpdateShutterPosition(true);
-#ifndef DEBUG
+#ifdef DEMO
                 printf("The computer has decided to open the shuttering system\n");
 #endif
             }

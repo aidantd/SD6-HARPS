@@ -234,6 +234,52 @@ static esp_err_t parseJsonResponse(void) {
     return ESP_OK;
 }
 
+#ifdef DEBUG
+// ********************************************************************************
+// Prints the JSON response in a formatted output
+// @param json: The JSON response to print
+// ********************************************************************************
+void printJsonFormatted(const char* json) {
+    if (json == NULL || json[0] == '\0') {
+        printf("Invalid JSON input\n");
+        return;
+    }
+
+    int indentLevel = 0;
+    int jsonLength = strlen(json);
+
+    for (int i = 0; i < jsonLength; i++) {
+        char currentChar = json[i];
+
+        if (currentChar == '{' || currentChar == '[') {
+            putchar(currentChar);
+            putchar('\n');
+            indentLevel++;
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+        } else if (currentChar == '}' || currentChar == ']') {
+            putchar('\n');
+            indentLevel--;
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+            putchar(currentChar);
+        } else if (currentChar == ',') {
+            putchar(currentChar);
+            putchar('\n');
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+        } else {
+            putchar(currentChar);
+        }
+    }
+
+    putchar('\n');
+}
+#endif
+
 // ********************************************************************************
 // Sets up the WiFi connection to the access point and handles the WiFi events for
 // the status of the connection
@@ -437,52 +483,6 @@ static void http_rest_with_url(void) {
     esp_http_client_cleanup(client);
 }
 
-#ifdef DEBUG
-// ********************************************************************************
-// Prints the JSON response in a formatted output
-// @param json: The JSON response to print
-// ********************************************************************************
-void printJsonFormatted(const char* json) {
-    if (json == NULL || json[0] == '\0') {
-        printf("Invalid JSON input\n");
-        return;
-    }
-
-    int indentLevel = 0;
-    int jsonLength = strlen(json);
-
-    for (int i = 0; i < jsonLength; i++) {
-        char currentChar = json[i];
-
-        if (currentChar == '{' || currentChar == '[') {
-            putchar(currentChar);
-            putchar('\n');
-            indentLevel++;
-            for (int j = 0; j < indentLevel; j++) {
-                putchar('\t');
-            }
-        } else if (currentChar == '}' || currentChar == ']') {
-            putchar('\n');
-            indentLevel--;
-            for (int j = 0; j < indentLevel; j++) {
-                putchar('\t');
-            }
-            putchar(currentChar);
-        } else if (currentChar == ',') {
-            putchar(currentChar);
-            putchar('\n');
-            for (int j = 0; j < indentLevel; j++) {
-                putchar('\t');
-            }
-        } else {
-            putchar(currentChar);
-        }
-    }
-
-    putchar('\n');
-}
-#endif
-
 // ********************************************************************************
 // ********************************************************************************
 void weatherApiTask(void* pvParameter) {
@@ -491,13 +491,16 @@ void weatherApiTask(void* pvParameter) {
             wifiGroupInit();
             wifi_init();
             wifiInitializationCompleted = true;
+#ifdef DEBUG
             printf("WiFi initialization completed\n");
+#endif
         } else if (xEventGroupGetBits(s_wifi_event_group) != WIFI_CONNECTED_BIT) {
             // wifi_init();
             esp_wifi_connect();
+#ifdef DEBUG
             printf("WiFi initialization From Failure\n");
+#endif
         } else {
-            printf("We good\n");
             http_rest_with_url();
 
 #ifdef DEBUG
@@ -509,7 +512,7 @@ void weatherApiTask(void* pvParameter) {
 
             parseJsonResponse();
 
-#ifdef DEBUG
+#ifdef DEMO
             printf("\n\n*******************************************\n");
             printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
             printf("Latitude: %d\n", weatherData.locationData.lat);

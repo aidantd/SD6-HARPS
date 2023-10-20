@@ -91,6 +91,17 @@ void pt_task(void *pvParameter) {
         pressure = calculatePressure(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
         humidity = calculateHumidity(calibrationData, bmeData.humidityMSB, bmeData.humidityLSB);
 
+#ifdef DEMO
+        if (error == ESP_OK) {
+            printf("Read from BME280 successfully\n");
+            printf("Temperature: %ld\n", temperature / 100);
+            printf("Pressure: %ld\n", pressure / 256);
+            printf("Humidity: %ld\n", humidity / 1024);
+        } else {
+            printf("Error reading from BME280: %d\n", error);
+        }
+#endif
+
 #ifdef DEBUG
         if (numSecondsPassed % 5 == 0) {
             numSecondsPassed = 0;
