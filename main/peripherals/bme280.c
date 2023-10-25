@@ -12,6 +12,8 @@
 #define CTRL_MEAS_OVERSAMPLING_TEMPERATURE 0b00100000
 #define CTRL_MEAS_FORCED_MODE 0b00000011
 
+#define CTRL_HUM_OVERSAMPLING_HUMIDITY 0b00000001
+
 static int32_t temperature_fine;
 
 // ********************************************************************************
@@ -47,9 +49,11 @@ esp_err_t bme280_init(void) {
 
     uint8_t writeCtrlMeas = CTRL_MEAS_OVERSAMPLING_TEMPERATURE | CTRL_MEAS_OVERSAMPLING_PRESSURE | CTRL_MEAS_FORCED_MODE;
 
-    printf("Ctrl meas register: %X\n", writeCtrlMeas);
-
     error |= writeToBME(&writeCtrlMeas, BME280_CTRL_MEAS, sizeof(writeCtrlMeas));
+
+    uint8_t writeDataCtrlHum = CTRL_HUM_OVERSAMPLING_HUMIDITY;
+
+    error |= writeToBME(&writeDataCtrlHum, BME280_CTRL_HUM, sizeof(writeDataCtrlHum));
 
     return error;
 }

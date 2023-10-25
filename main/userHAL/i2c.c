@@ -68,9 +68,6 @@ esp_err_t i2c_write_to_device(uint8_t deviceAddress, uint8_t *data, uint8_t regi
 esp_err_t i2c_read_from_device(uint8_t deviceAddress, uint8_t *buffer, uint8_t registerAddress, size_t size) {
     i2c_cmd_handle_t handle = i2c_cmd_link_create();
 
-    printf("Slave Address in hex for write: %x\n", (deviceAddress << 1) | I2C_MASTER_WRITE);
-    printf("Slave Address in hex for read: %x\n", (deviceAddress << 1) | I2C_MASTER_READ);
-
     // Queue I2C commands to read from device
     i2c_master_start(handle);
     i2c_master_write_byte(handle, (deviceAddress << 1) | I2C_MASTER_WRITE, true);
