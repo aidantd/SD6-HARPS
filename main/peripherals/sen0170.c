@@ -29,7 +29,7 @@ uint32_t readSen0170(void) {
     readVoltage = readADC(ADC_SEN0170);
 
 #ifdef DEMO
-    printf("SEN0170 Voltage: %ld\n", readVoltage);
+    printf("SEN0170 Voltage: %ld mV\n", readVoltage);
 #endif
 
     // readVoltage = calculateWindSpeed(readVoltage);

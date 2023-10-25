@@ -30,9 +30,7 @@ extern uint32_t getLastRecordedWindSpeedMPH();
 void decisionMakingTask(void *pvParameter) {
     while (1) {
         // Check shutter status and determine if the system needs to update the shutters
-        printf("Shutter Status: %d\n", getShutterStatus());
         uint32_t lastRecordedSpeed = getLastRecordedWindSpeedMPH();
-        printf("Last Recorded Wind Speed: %ld\n", lastRecordedSpeed);
         switch (getShutterStatus()) {
         case SHUTTER_STATUS_OPEN:
             if (lastRecordedSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {

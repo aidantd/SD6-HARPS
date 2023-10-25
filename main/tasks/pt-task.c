@@ -91,7 +91,7 @@ void pt_task(void *pvParameter) {
         pressure = calculatePressure(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
         humidity = calculateHumidity(calibrationData, bmeData.humidityMSB, bmeData.humidityLSB);
 
-#ifdef DEMO2
+#ifdef DEMO
         if (error == ESP_OK) {
             printf("Temperature: %ld\n", temperature / 100);
             printf("Pressure: %ld\n", pressure / 256);
@@ -101,28 +101,26 @@ void pt_task(void *pvParameter) {
         }
 #endif
 
-#ifdef DEMO
-        if (numSecondsPassed % 2 == 0) {
-            numSecondsPassed = 0;
-            if (error == ESP_OK) {
-                printf("Temperature: %ld\n", temperature / 100);
-                printf("Pressure: %ld\n", pressure / 256);
-                printf("Humidity: %ld\n", humidity / 1024);
+#ifdef DEBUG
+        if (error == ESP_OK) {
+            printf("Temperature: %ld Celsius\n", temperature / 100);
+            printf("Pressure: %ld Pascels\n", pressure / 256);
+            printf("Humidity: %ld RH\n\n", humidity / 1024);
 
-                printf("Ctrl Meas: %X\n", bmeData.ctrlMeas);
-                printf("Config: %X\n", bmeData.config);
-                printf("Pressure MSB: %X\n", bmeData.pressureMSB);
-                printf("Pressure LSB: %X\n", bmeData.pressureLSB);
-                printf("Pressure XLSB: %X\n", bmeData.pressureXLSB);
-                printf("Temperature MSB: %X\n", bmeData.temperatureMSB);
-                printf("Temperature LSB: %X\n", bmeData.temperatureLSB);
-                printf("Temperature XLSB: %X\n", bmeData.temperatureXLSB);
-                printf("Humidity MSB: %X\n", bmeData.humidityMSB);
-                printf("Humidity LSB: %X\n", bmeData.humidityLSB);
-            } else {
-                printf("Error reading from BME280: %d\n", error);
-            }
+            printf("Ctrl Meas: %X\n", bmeData.ctrlMeas);
+            printf("Config: %X\n", bmeData.config);
+            printf("Pressure MSB: %X\n", bmeData.pressureMSB);
+            printf("Pressure LSB: %X\n", bmeData.pressureLSB);
+            printf("Pressure XLSB: %X\n", bmeData.pressureXLSB);
+            printf("Temperature MSB: %X\n", bmeData.temperatureMSB);
+            printf("Temperature LSB: %X\n", bmeData.temperatureLSB);
+            printf("Temperature XLSB: %X\n", bmeData.temperatureXLSB);
+            printf("Humidity MSB: %X\n", bmeData.humidityMSB);
+            printf("Humidity LSB: %X\n\n", bmeData.humidityLSB);
+        } else {
+            printf("Error reading from BME280: %d\n", error);
         }
+
 #endif
 
         vTaskDelay(2000 / portTICK_PERIOD_MS);
