@@ -8,11 +8,7 @@
 
 // Declarations
 
-// static dac_continuous_handle_t dac_handle;
-
 dac_cosine_handle_t chan0_handle;
-
-static uint32_t cnt = 1;
 
 // ********************************************************************************
 // Initializes the DAC
@@ -23,7 +19,7 @@ esp_err_t initDAC(void) {
 
     dac_cosine_config_t cos0_cfg = {
         .chan_id = DAC_CHAN_0,
-        .freq_hz = 1000,  // It will be covered by 8000 in the latter configuration
+        .freq_hz = 1000,
         .clk_src = DAC_COSINE_CLK_SRC_DEFAULT,
         .offset = 0,
         .phase = DAC_COSINE_PHASE_0,
