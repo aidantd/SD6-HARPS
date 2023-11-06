@@ -7,6 +7,8 @@
 #define MAX_FIELD_LENGTH 256
 
 // The below structs are used to store the data from weatherAPI.com
+// We do not request all the data the weatherAPI.com can send us, because of this the below structs
+// only hold the date we want
 
 struct condition {
     char text[MAX_FIELD_LENGTH];
@@ -51,7 +53,61 @@ struct currentWeather {
     int gust_kph;
 };
 
+struct dayForecast {
+    int maxtemp_c;
+    int maxtemp_f;
+    int mintemp_c;
+    int mintemp_f;
+    int avgtemp_c;
+    int avgtemp_f;
+    int maxwind_mph;
+    int maxwind_kph;
+    int totalprecip_mm;
+    int totalprecip_in;
+    int totalsnow_cm;
+    int avgvis_km;
+    int avgvis_miles;
+    int avghumidity;
+    int daily_will_it_rain;
+    int daily_chance_of_rain;
+    int daily_will_it_snow;
+    int daily_chance_of_snow;
+    struct condition forecastCondition;
+    int uv;
+};
+
+struct forecastDaily {
+    char date[MAX_FIELD_LENGTH];
+    int date_epoch;
+    struct dayForecast currentDayForecast;
+};
+
+struct forecastWeather {
+    struct forecastDaily currentForecastDaily;
+};
+
+struct alert {
+    char headline[MAX_FIELD_LENGTH];
+    char msgtype[MAX_FIELD_LENGTH];
+    char severity[MAX_FIELD_LENGTH];
+    char urgency[MAX_FIELD_LENGTH];
+    char areas[MAX_FIELD_LENGTH];
+    char category[MAX_FIELD_LENGTH];
+    char certainty[MAX_FIELD_LENGTH];
+    char event[MAX_FIELD_LENGTH];
+    char note[MAX_FIELD_LENGTH];
+    char effective[MAX_FIELD_LENGTH];
+    char expires[MAX_FIELD_LENGTH];
+    char desc[MAX_FIELD_LENGTH];
+    char instruction[MAX_FIELD_LENGTH];
+};
+
+struct weatherAlerts {
+    struct alert currentAlerts;
+};
 struct weatherResponseData {
     struct location locationData;
     struct currentWeather currentWeatherData;
+    struct forecastWeather currentForecastData;
+    struct weatherAlerts currentAlertData;
 };

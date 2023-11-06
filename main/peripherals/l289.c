@@ -9,10 +9,11 @@
 #define M1_FORWARD GPIO_NUM_27
 #define M1_BACKWARD
 #define M2_FORWARD GPIO_NUM_17
-#define M2_BACKWARD GPIO_NUM_13
+#define M2_BACKWARD GPIO_NUM_16
 
 static uint8_t shutterPosition = SHUTTER_STATUS_OPEN;
 static uint8_t motorRunning = false;
+static uint8_t needToUpdateShutters = false;
 
 // ********************************************************************************
 // Initializes the L289 motor driver
@@ -97,4 +98,20 @@ void setShutterStatus(uint8_t shutterStatus) {
 // ********************************************************************************
 uint8_t isMotorActive(void) {
     return motorRunning;
+}
+
+// ********************************************************************************
+// Gets wether or not the systems shutters need to be updated
+// @return: Whether or not the systems shutters need to be updated
+// ********************************************************************************
+uint8_t isNeedToUpdateShutterPosition(void) {
+    return needToUpdateShutters;
+}
+
+// ********************************************************************************
+// Sets whether or not the systems shutters need to be updated
+// @param updateShutterStatus: Whether or not the systems shutters need to be updated
+// ********************************************************************************
+void setNeedToUpdateShutterPosition(uint8_t updateShutterStatus) {
+    needToUpdateShutters = updateShutterStatus;
 }

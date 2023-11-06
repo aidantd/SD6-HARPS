@@ -12,6 +12,7 @@
 #define BME280_ADDRESS 0x76
 
 struct registerDataMapBME {
+    uint8_t ctrlMeas;
     uint8_t config;
     uint8_t unusedRegister;  // This register depicts the jump in the position of the data registers
     uint8_t pressureMSB;
@@ -71,7 +72,9 @@ enum registerPointerValuesBME {
     BME280_REGISTER_DIG_H6 = 0xE7,
 
     // Data Registers
-    BME280_REGISTER_CONFIG = 0xF5,
+    BME280_CTRL_HUM = 0xF2,
+    BME280_CTRL_MEAS = 0xF4,
+    BME280_REGISTER_CONFIG,
     BME280_REGISTER_PRESSURE_MSB = 0xF7,
     BME280_REGISTER_PRESSURE_LSB,
     BME280_REGISTER_PRESSURE_XLSB,

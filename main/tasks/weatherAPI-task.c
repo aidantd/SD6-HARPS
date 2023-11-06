@@ -38,7 +38,7 @@
 
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 
-#define WEATHER_API_URL "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=Orlando&aqi=no"
+#define WEATHER_API_URL "http://api.weatherapi.com/v1/current.json?key=99014095ccf64eca81e155920230409&q=Orlando&days=1&aqi=no&alerts=yes"
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -51,6 +51,8 @@ static int jsonOffset = 0;
 static struct weatherResponseData weatherData;
 
 static char systemIP[16];
+
+static bool wifiInitializationCompleted = false;
 
 // ********************************************************************************
 // Parses the JSON response received from the weather API
@@ -108,6 +110,51 @@ static esp_err_t parseJsonResponse(void) {
     cJSON* gust_mph = cJSON_GetObjectItemCaseSensitive(current, "gust_mph");
     cJSON* gust_kph = cJSON_GetObjectItemCaseSensitive(current, "gust_kph");
 
+    // cJSON* forecast = cJSON_GetObjectItemCaseSensitive(parsedResponse, "forecast");
+    // cJSON* forecastday = cJSON_GetObjectItemCaseSensitive(forecast, "forecastday");
+    // cJSON* date = cJSON_GetObjectItemCaseSensitive(forecastday, "date");
+    // cJSON* date_epoch = cJSON_GetObjectItemCaseSensitive(forecastday, "date_epoch");
+    // cJSON* day = cJSON_GetObjectItemCaseSensitive(forecastday, "day");
+    // cJSON* maxtemp_c = cJSON_GetObjectItemCaseSensitive(day, "maxtemp_c");
+    // cJSON* maxtemp_f = cJSON_GetObjectItemCaseSensitive(day, "maxtemp_f");
+    // cJSON* mintemp_c = cJSON_GetObjectItemCaseSensitive(day, "mintemp_c");
+    // cJSON* mintemp_f = cJSON_GetObjectItemCaseSensitive(day, "mintemp_f");
+    // cJSON* avgtemp_c = cJSON_GetObjectItemCaseSensitive(day, "avgtemp_c");
+    // cJSON* avgtemp_f = cJSON_GetObjectItemCaseSensitive(day, "avgtemp_f");
+    // cJSON* maxwind_mph = cJSON_GetObjectItemCaseSensitive(day, "maxwind_mph");
+    // cJSON* maxwind_kph = cJSON_GetObjectItemCaseSensitive(day, "maxwind_kph");
+    // cJSON* totalprecip_mm = cJSON_GetObjectItemCaseSensitive(day, "totalprecip_mm");
+    // cJSON* totalprecip_in = cJSON_GetObjectItemCaseSensitive(day, "totalprecip_in");
+    // cJSON* totalsnow_cm = cJSON_GetObjectItemCaseSensitive(day, "totalsnow_cm");
+    // cJSON* avgvis_km = cJSON_GetObjectItemCaseSensitive(day, "avgvis_km");
+    // cJSON* avgvis_miles = cJSON_GetObjectItemCaseSensitive(day, "avgvis_miles");
+    // cJSON* avghumidity = cJSON_GetObjectItemCaseSensitive(day, "avghumidity");
+    // cJSON* daily_will_it_rain = cJSON_GetObjectItemCaseSensitive(day, "daily_will_it_rain");
+    // cJSON* daily_chance_of_rain = cJSON_GetObjectItemCaseSensitive(day, "daily_chance_of_rain");
+    // cJSON* daily_will_it_snow = cJSON_GetObjectItemCaseSensitive(day, "daily_will_it_snow");
+    // cJSON* daily_chance_of_snow = cJSON_GetObjectItemCaseSensitive(day, "daily_chance_of_snow");
+    // cJSON* conditionForecast = cJSON_GetObjectItemCaseSensitive(day, "condition");
+    // cJSON* textForecast = cJSON_GetObjectItemCaseSensitive(conditionForecast, "text");
+    // cJSON* iconForecast = cJSON_GetObjectItemCaseSensitive(conditionForecast, "icon");
+    // cJSON* codeForecast = cJSON_GetObjectItemCaseSensitive(conditionForecast, "code");
+    // cJSON* uvForecast = cJSON_GetObjectItemCaseSensitive(day, "uv");
+
+    // cJSON* alerts = cJSON_GetObjectItemCaseSensitive(parsedResponse, "alerts");
+    // cJSON* alert = cJSON_GetObjectItemCaseSensitive(alerts, "alert");
+    // cJSON* headline = cJSON_GetObjectItemCaseSensitive(alert, "headline");
+    // cJSON* msgtype = cJSON_GetObjectItemCaseSensitive(alert, "msgtype");
+    // cJSON* severity = cJSON_GetObjectItemCaseSensitive(alert, "severity");
+    // cJSON* urgency = cJSON_GetObjectItemCaseSensitive(alert, "urgency");
+    // cJSON* areas = cJSON_GetObjectItemCaseSensitive(alert, "areas");
+    // cJSON* category = cJSON_GetObjectItemCaseSensitive(alert, "category");
+    // cJSON* certainty = cJSON_GetObjectItemCaseSensitive(alert, "certainty");
+    // cJSON* event = cJSON_GetObjectItemCaseSensitive(alert, "event");
+    // cJSON* note = cJSON_GetObjectItemCaseSensitive(alert, "note");
+    // cJSON* effective = cJSON_GetObjectItemCaseSensitive(alert, "effective");
+    // cJSON* expires = cJSON_GetObjectItemCaseSensitive(alert, "expires");
+    // cJSON* desc = cJSON_GetObjectItemCaseSensitive(alert, "desc");
+    // cJSON* instruction = cJSON_GetObjectItemCaseSensitive(alert, "instruction");
+
     memcpy(&weatherData.locationData.name, name->valuestring, strlen(name->valuestring));
     memcpy(&weatherData.locationData.region, region->valuestring, strlen(region->valuestring));
     memcpy(&weatherData.locationData.country, country->valuestring, strlen(country->valuestring));
@@ -116,6 +163,7 @@ static esp_err_t parseJsonResponse(void) {
     memcpy(&weatherData.locationData.tz_id, tz_id->valuestring, strlen(tz_id->valuestring));
     memcpy(&weatherData.locationData.localtime, localtime->valuestring, strlen(localtime->valuestring));
     weatherData.locationData.localtime_epoch = localtime_epoch->valueint;
+
     memcpy(&weatherData.currentWeatherData.last_updated, last_updated->valuestring, strlen(last_updated->valuestring));
     weatherData.currentWeatherData.last_updated_epoch = last_updated_epoch->valueint;
     weatherData.currentWeatherData.temp_c = temp_c->valueint;
@@ -142,10 +190,95 @@ static esp_err_t parseJsonResponse(void) {
     weatherData.currentWeatherData.gust_mph = gust_mph->valueint;
     weatherData.currentWeatherData.gust_kph = gust_kph->valueint;
 
+    // memcpy(&weatherData.currentForecastData.currentForecastDaily.date, date->valuestring, strlen(date->valuestring));
+    // weatherData.currentForecastData.currentForecastDaily.date_epoch = date_epoch->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxtemp_c = maxtemp_c->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxtemp_f = maxtemp_f->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.mintemp_c = mintemp_c->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.mintemp_f = mintemp_f->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgtemp_c = avgtemp_c->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgtemp_f = avgtemp_f->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxwind_mph = maxwind_mph->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxwind_kph = maxwind_kph->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.totalprecip_mm = totalprecip_mm->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.totalprecip_in = totalprecip_in->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.totalsnow_cm = totalsnow_cm->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgvis_km = avgvis_km->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgvis_miles = avgvis_miles->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avghumidity = avghumidity->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_will_it_rain = daily_will_it_rain->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_chance_of_rain = daily_chance_of_rain->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_will_it_snow = daily_will_it_snow->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_chance_of_snow = daily_chance_of_snow->valueint;
+    // memcpy(&weatherData.currentForecastData.currentForecastDaily.currentDayForecast.forecastCondition.text, textForecast->valuestring, strlen(textForecast->valuestring));
+    // memcpy(&weatherData.currentForecastData.currentForecastDaily.currentDayForecast.forecastCondition.icon, iconForecast->valuestring, strlen(icon->valuestring));
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.forecastCondition.code = codeForecast->valueint;
+    // weatherData.currentForecastData.currentForecastDaily.currentDayForecast.uv = uvForecast->valueint;
+
+    // memcpy(&weatherData.currentAlertData.currentAlerts.headline, headline->valuestring, strlen(headline->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.msgtype, msgtype->valuestring, strlen(msgtype->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.severity, severity->valuestring, strlen(severity->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.urgency, urgency->valuestring, strlen(urgency->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.areas, areas->valuestring, strlen(areas->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.category, category->valuestring, strlen(category->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.certainty, certainty->valuestring, strlen(certainty->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.event, event->valuestring, strlen(event->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.note, note->valuestring, strlen(note->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.effective, effective->valuestring, strlen(effective->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.expires, expires->valuestring, strlen(expires->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.desc, desc->valuestring, strlen(desc->valuestring));
+    // memcpy(&weatherData.currentAlertData.currentAlerts.instruction, instruction->valuestring, strlen(instruction->valuestring));
+
     cJSON_Delete(parsedResponse);
 
     return ESP_OK;
 }
+
+#ifdef DEBUG
+// ********************************************************************************
+// Prints the JSON response in a formatted output
+// @param json: The JSON response to print
+// ********************************************************************************
+void printJsonFormatted(const char* json) {
+    if (json == NULL || json[0] == '\0') {
+        printf("Invalid JSON input\n");
+        return;
+    }
+
+    int indentLevel = 0;
+    int jsonLength = strlen(json);
+
+    for (int i = 0; i < jsonLength; i++) {
+        char currentChar = json[i];
+
+        if (currentChar == '{' || currentChar == '[') {
+            putchar(currentChar);
+            putchar('\n');
+            indentLevel++;
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+        } else if (currentChar == '}' || currentChar == ']') {
+            putchar('\n');
+            indentLevel--;
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+            putchar(currentChar);
+        } else if (currentChar == ',') {
+            putchar(currentChar);
+            putchar('\n');
+            for (int j = 0; j < indentLevel; j++) {
+                putchar('\t');
+            }
+        } else {
+            putchar(currentChar);
+        }
+    }
+
+    putchar('\n');
+}
+#endif
 
 // ********************************************************************************
 // Sets up the WiFi connection to the access point and handles the WiFi events for
@@ -169,7 +302,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         printf("connect to the AP fail\n");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
-#ifndef DEBUF
+#ifdef DEBUF
         printf("got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         printf("\n");
 #endif
@@ -246,9 +379,9 @@ esp_err_t _http_event_handler(esp_http_client_event_t* evt) {
 }
 
 // ********************************************************************************
-// Initializes the WiFi connection to the access point
+// Initializes the WiFi event group and network interface
 // ********************************************************************************
-esp_err_t wifi_init(void) {
+static void wifiGroupInit(void) {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -265,8 +398,14 @@ esp_err_t wifi_init(void) {
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
 
+    esp_netif_create_default_wifi_sta();
+}
+
+// ********************************************************************************
+// Initializes the WiFi connection to the access point
+// ********************************************************************************
+esp_err_t wifi_init(void) {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
@@ -344,104 +483,106 @@ static void http_rest_with_url(void) {
     esp_http_client_cleanup(client);
 }
 
-#ifdef DEBUG
-// ********************************************************************************
-// Prints the JSON response in a formatted output
-// @param json: The JSON response to print
-// ********************************************************************************
-void printJsonFormatted(const char* json) {
-    if (json == NULL || json[0] == '\0') {
-        printf("Invalid JSON input\n");
-        return;
-    }
-
-    int indentLevel = 0;
-    int jsonLength = strlen(json);
-
-    for (int i = 0; i < jsonLength; i++) {
-        char currentChar = json[i];
-
-        if (currentChar == '{' || currentChar == '[') {
-            putchar(currentChar);
-            putchar('\n');
-            indentLevel++;
-            for (int j = 0; j < indentLevel; j++) {
-                putchar('\t');
-            }
-        } else if (currentChar == '}' || currentChar == ']') {
-            putchar('\n');
-            indentLevel--;
-            for (int j = 0; j < indentLevel; j++) {
-                putchar('\t');
-            }
-            putchar(currentChar);
-        } else if (currentChar == ',') {
-            putchar(currentChar);
-            putchar('\n');
-            for (int j = 0; j < indentLevel; j++) {
-                putchar('\t');
-            }
-        } else {
-            putchar(currentChar);
-        }
-    }
-
-    putchar('\n');
-}
-#endif
-
 // ********************************************************************************
 // ********************************************************************************
 void weatherApiTask(void* pvParameter) {
     while (1) {
-        http_rest_with_url();
+        if (wifiInitializationCompleted == false) {
+            wifiGroupInit();
+            wifi_init();
+            wifiInitializationCompleted = true;
+#ifdef DEBUG
+            printf("WiFi initialization completed\n");
+#endif
+        } else if (xEventGroupGetBits(s_wifi_event_group) != WIFI_CONNECTED_BIT) {
+            // wifi_init();
+            esp_wifi_connect();
+#ifdef DEBUG
+            printf("WiFi initialization From Failure\n");
+#endif
+        } else {
+            http_rest_with_url();
 
 #ifdef DEBUG
-        printf("\n\n*******************************************\n");
-        // printJsonFormatted(jsonResponse);
-        printf("%s\n", jsonResponse);
-        printf("*******************************************\n\n");
+            printf("\n\n*******************************************\n");
+            // printJsonFormatted(jsonResponse);
+            printf("%s\n", jsonResponse);
+            printf("*******************************************\n\n");
 #endif
 
-        parseJsonResponse();
+            parseJsonResponse();
 
-#ifdef DEBUG
-        printf("\n\n*******************************************\n");
-        printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
-        printf("Latitude: %d\n", weatherData.locationData.lat);
-        printf("Longitude: %d\n", weatherData.locationData.lon);
-        printf("Timezone ID: %s\n", weatherData.locationData.tz_id);
-        printf("Local Time: %s\n", weatherData.locationData.localtime);
-        printf("Local Time Epoch: %d\n", weatherData.locationData.localtime_epoch);
-        printf("Last Updated: %s\n", weatherData.currentWeatherData.last_updated);
-        printf("Last Updated Epoch: %d\n", weatherData.currentWeatherData.last_updated_epoch);
-        printf("Temperature (C): %d\n", weatherData.currentWeatherData.temp_c);
-        printf("Temperature (F): %d\n", weatherData.currentWeatherData.temp_f);
-        printf("Is Day: %d\n", weatherData.currentWeatherData.is_day);
-        printf("Condition: %s\n", weatherData.currentWeatherData.conditionData.text);
-        printf("Condition Icon: %s\n", weatherData.currentWeatherData.conditionData.icon);
-        printf("Condition Code: %d\n", weatherData.currentWeatherData.conditionData.code);
-        printf("Wind Speed (mph): %d\n", weatherData.currentWeatherData.wind_mph);
-        printf("Wind Speed (kph): %d\n", weatherData.currentWeatherData.wind_kph);
-        printf("Wind Degree: %d\n", weatherData.currentWeatherData.wind_degree);
-        printf("Wind Direction: %s\n", weatherData.currentWeatherData.wind_dir);
-        printf("Pressure (mb): %d\n", weatherData.currentWeatherData.pressure_mb);
-        printf("Pressure (in): %d\n", weatherData.currentWeatherData.pressure_in);
-        printf("Precipitation (mm): %d\n", weatherData.currentWeatherData.precip_mm);
-        printf("Precipitation (in): %d\n", weatherData.currentWeatherData.precip_in);
-        printf("Humidity: %d\n", weatherData.currentWeatherData.humidity);
-        printf("Cloud: %d\n", weatherData.currentWeatherData.cloud);
-        printf("Feels Like (C): %d\n", weatherData.currentWeatherData.feelslike_c);
-        printf("Feels Like (F): %d\n", weatherData.currentWeatherData.feelslike_f);
-        printf("Visibility (km): %d\n", weatherData.currentWeatherData.vis_km);
-        printf("Visibility (miles): %d\n", weatherData.currentWeatherData.vis_miles);
-        printf("UV: %d\n", weatherData.currentWeatherData.uv);
-        printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
-        printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
-        printf("System IP: %s\n", systemIP);
-        printf("*******************************************\n\n");
+#ifdef DEMO
+            printf("\n\n*******************************************\n");
+            printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
+            printf("Latitude: %d\n", weatherData.locationData.lat);
+            printf("Longitude: %d\n", weatherData.locationData.lon);
+            printf("Timezone ID: %s\n", weatherData.locationData.tz_id);
+            printf("Local Time: %s\n", weatherData.locationData.localtime);
+            printf("Local Time Epoch: %d\n", weatherData.locationData.localtime_epoch);
+            printf("Last Updated: %s\n", weatherData.currentWeatherData.last_updated);
+            printf("Last Updated Epoch: %d\n", weatherData.currentWeatherData.last_updated_epoch);
+            printf("Temperature (C): %d\n", weatherData.currentWeatherData.temp_c);
+            printf("Temperature (F): %d\n", weatherData.currentWeatherData.temp_f);
+            printf("Is Day: %d\n", weatherData.currentWeatherData.is_day);
+            printf("Condition: %s\n", weatherData.currentWeatherData.conditionData.text);
+            printf("Condition Icon: %s\n", weatherData.currentWeatherData.conditionData.icon);
+            printf("Condition Code: %d\n", weatherData.currentWeatherData.conditionData.code);
+            printf("Wind Speed (mph): %d\n", weatherData.currentWeatherData.wind_mph);
+            printf("Wind Speed (kph): %d\n", weatherData.currentWeatherData.wind_kph);
+            printf("Wind Degree: %d\n", weatherData.currentWeatherData.wind_degree);
+            printf("Wind Direction: %s\n", weatherData.currentWeatherData.wind_dir);
+            printf("Pressure (mb): %d\n", weatherData.currentWeatherData.pressure_mb);
+            printf("Pressure (in): %d\n", weatherData.currentWeatherData.pressure_in);
+            printf("Precipitation (mm): %d\n", weatherData.currentWeatherData.precip_mm);
+            printf("Precipitation (in): %d\n", weatherData.currentWeatherData.precip_in);
+            printf("Humidity: %d\n", weatherData.currentWeatherData.humidity);
+            printf("Cloud: %d\n", weatherData.currentWeatherData.cloud);
+            printf("Feels Like (C): %d\n", weatherData.currentWeatherData.feelslike_c);
+            printf("Feels Like (F): %d\n", weatherData.currentWeatherData.feelslike_f);
+            printf("Visibility (km): %d\n", weatherData.currentWeatherData.vis_km);
+            printf("Visibility (miles): %d\n", weatherData.currentWeatherData.vis_miles);
+            printf("UV: %d\n", weatherData.currentWeatherData.uv);
+            printf("Gust Speed (mph): %d\n", weatherData.currentWeatherData.gust_mph);
+            printf("Gust Speed (kph): %d\n", weatherData.currentWeatherData.gust_kph);
+            // printf("Max Temperature (C): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxtemp_c);
+            // printf("Max Temperature (F): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxtemp_f);
+            // printf("Min Temperature (C): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.mintemp_c);
+            // printf("Min Temperature (F): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.mintemp_f);
+            // printf("Average Temperature (C): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgtemp_c);
+            // printf("Average Temperature (F): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgtemp_f);
+            // printf("Max Wind Speed (mph): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxwind_mph);
+            // printf("Max Wind Speed (kph): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.maxwind_kph);
+            // printf("Total Precipitation (mm): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.totalprecip_mm);
+            // printf("Total Precipitation (in): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.totalprecip_in);
+            // printf("Total Snow (cm): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.totalsnow_cm);
+            // printf("Average Visibility (km): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgvis_km);
+            // printf("Average Visibility (miles): %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avgvis_miles);
+            // printf("Average Humidity: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.avghumidity);
+            // printf("Daily Will It Rain: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_will_it_rain);
+            // printf("Daily Chance of Rain: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_chance_of_rain);
+            // printf("Daily Will It Snow: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_will_it_snow);
+            // printf("Daily Chance of Snow: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.daily_chance_of_snow);
+            // printf("Forecast Condition: %s\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.forecastCondition.text);
+            // printf("Forecast Condition Icon: %s\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.forecastCondition.icon);
+            // printf("Forecast Condition Code: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.forecastCondition.code);
+            // printf("Forecast UV: %d\n", weatherData.currentForecastData.currentForecastDaily.currentDayForecast.uv);
+            // printf("Alert Headline: %s\n", weatherData.currentAlertData.currentAlerts.headline);
+            // printf("Alert Message Type: %s\n", weatherData.currentAlertData.currentAlerts.msgtype);
+            // printf("Alert Severity: %s\n", weatherData.currentAlertData.currentAlerts.severity);
+            // printf("Alert Urgency: %s\n", weatherData.currentAlertData.currentAlerts.urgency);
+            // printf("Alert Areas: %s\n", weatherData.currentAlertData.currentAlerts.areas);
+            // printf("Alert Category: %s\n", weatherData.currentAlertData.currentAlerts.category);
+            // printf("Alert Certainty: %s\n", weatherData.currentAlertData.currentAlerts.certainty);
+            // printf("Alert Event: %s\n", weatherData.currentAlertData.currentAlerts.event);
+            // printf("Alert Note: %s\n", weatherData.currentAlertData.currentAlerts.note);
+            // printf("Alert Effective: %s\n", weatherData.currentAlertData.currentAlerts.effective);
+            // printf("Alert Expires: %s\n", weatherData.currentAlertData.currentAlerts.expires);
+            // printf("Alert Description: %s\n", weatherData.currentAlertData.currentAlerts.desc);
+            // printf("Alert Instruction: %s\n", weatherData.currentAlertData.currentAlerts.instruction);
+            printf("*******************************************\n\n");
 #endif
-
+        }
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
 }

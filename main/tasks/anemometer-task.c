@@ -10,25 +10,25 @@
 
 // Declarations
 
-static uint32_t lastRecordedWindSpeed;
+static uint32_t lastRecordedWindSpeedMPH;
 
 // ********************************************************************************
 // Gets the last recorded wind speed
 // @return: The last recorded wind speed as a 32-bit unsigned integer
 // ********************************************************************************
-uint32_t getLastRecordedWindSpeed() {
-    return lastRecordedWindSpeed;
+uint32_t getLastRecordedWindSpeedMPH() {
+    return lastRecordedWindSpeedMPH;
 }
 
 // ********************************************************************************
 // ********************************************************************************
 void anemometerTask(void* pvParameter) {
     while (1) {
-        lastRecordedWindSpeed = readSen0170();
+        lastRecordedWindSpeedMPH = readSen0170();
 
-#ifdef DEBUG
-        printf("Wind Speed: %ld\n", lastRecordedWindSpeed);
+#ifdef DEMO
+        printf("\nWind Speed: %ld MPH\n\n", lastRecordedWindSpeedMPH);
 #endif
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }

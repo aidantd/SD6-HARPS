@@ -8,6 +8,12 @@
 #define CONFIG_FILTER_COEFFICIENT_8 0b00001100
 #define CONFIG_SPI_DISABLE 0b00000000
 
+#define CTRL_MEAS_OVERSAMPLING_PRESSURE 0b00000100
+#define CTRL_MEAS_OVERSAMPLING_TEMPERATURE 0b00100000
+#define CTRL_MEAS_FORCED_MODE 0b00000011
+
+#define CTRL_HUM_OVERSAMPLING_HUMIDITY 0b00000001
+
 static int32_t temperature_fine;
 
 // ********************************************************************************
@@ -36,9 +42,20 @@ esp_err_t writeToBME(uint8_t *data, uint8_t registerAddress, size_t size) {
 // @return: ESP_OK if successful, ESP_FAIL if unsuccessful
 // ********************************************************************************
 esp_err_t bme280_init(void) {
+    esp_err_t error = ESP_OK;
     uint8_t writeDataConfig = CONFIG_STANDBY_TIME_62_MS | CONFIG_FILTER_COEFFICIENT_8 | CONFIG_SPI_DISABLE;
 
-    return writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
+    error |= writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
+
+    uint8_t writeCtrlMeas = CTRL_MEAS_OVERSAMPLING_TEMPERATURE | CTRL_MEAS_OVERSAMPLING_PRESSURE | CTRL_MEAS_FORCED_MODE;
+
+    error |= writeToBME(&writeCtrlMeas, BME280_CTRL_MEAS, sizeof(writeCtrlMeas));
+
+    uint8_t writeDataCtrlHum = CTRL_HUM_OVERSAMPLING_HUMIDITY;
+
+    error |= writeToBME(&writeDataCtrlHum, BME280_CTRL_HUM, sizeof(writeDataCtrlHum));
+
+    return error;
 }
 
 // ********************************************************************************
