@@ -17,8 +17,6 @@ extern void motorTask(void* pvParameter);
 extern void anemometerTask(void* pvParameter);
 extern void decisionMakingTask(void* pvParameter);
 
-extern esp_err_t wifi_init(void);
-
 // Declarations
 
 esp_err_t boardInit(void) {

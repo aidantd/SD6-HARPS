@@ -26,31 +26,47 @@ extern uint32_t getLastRecordedWindSpeedMPH();
 #define WIND_SPEED_DEACTIVATION_THRESHOLD_MPH 100
 
 // ********************************************************************************
+// Checks if the activation threshold has been reached
+// @param lastRecordedSpeed: last recorded wind speed in MPH
+// @return: 1 if the activation threshold has been reached, 0 otherwise
+// ********************************************************************************
+static uint8_t isActivationThresholdReached(uint32_t lastRecordedSpeed) {
+    if (lastRecordedSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {
+        return 1;
+    }
+
+    return 0;
+}
+
+// ********************************************************************************
+// Checks if the deactivation threshold has been reached
+// @param lastRecordedSpeed: last recorded wind speed in MPH
+// @return: 1 if the activation threshold has been reached, 0 otherwise
+// ********************************************************************************
+static uint8_t isDeactivationThresholdReached(uint32_t lastRecordedSpeed) {
+    if (lastRecordedSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
+        return 1;
+    }
+
+    return 0;
+}
+
+// ********************************************************************************
 // ********************************************************************************
 void decisionMakingTask(void *pvParameter) {
     while (1) {
         // Check shutter status and determine if the system needs to update the shutters
         uint32_t lastRecordedSpeed = getLastRecordedWindSpeedMPH();
-        switch (getShutterStatus()) {
-        case SHUTTER_STATUS_OPEN:
-            if (lastRecordedSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {
-                setNeedToUpdateShutterPosition(true);
+
+        // Check if the activation threshold has been reached
+        if (isActivationThresholdReached(lastRecordedSpeed) ||
+            isDeactivationThresholdReached(lastRecordedSpeed)) {
 #ifdef DEMO
-                printf("\nThe computer has decided to close the shuttering system\n");
+            printf("\nThe computer has decided to update the shutter position\n");
 #endif
-            }
-            break;
-        case SHUTTER_STATUS_CLOSED:
-            if (lastRecordedSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
-                setNeedToUpdateShutterPosition(true);
-#ifdef DEMO
-                printf("\nThe computer has decided to open the shuttering system\n");
-#endif
-            }
-            break;
-        default:
-            break;
+            setNeedToUpdateShutterPosition(true);
         }
+
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
