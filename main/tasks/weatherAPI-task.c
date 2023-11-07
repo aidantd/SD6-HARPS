@@ -496,7 +496,7 @@ void weatherApiTask(void* pvParameter) {
             wifiGroupInit();
             wifi_init();
             wifiInitializationCompleted = true;
-#ifdef WIFI
+#ifdef DEBUG
             printf("WiFi initialization completed\n");
 #endif
         } else {
@@ -507,7 +507,7 @@ void weatherApiTask(void* pvParameter) {
 
                 parseJsonResponse();
 
-#ifdef WIFI
+#ifdef DEMO
                 printf("\n\n*******************************************\n");
                 printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
                 printf("Latitude: %d\n", weatherData.locationData.lat);
