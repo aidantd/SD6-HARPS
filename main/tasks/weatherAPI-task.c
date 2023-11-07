@@ -500,12 +500,9 @@ void weatherApiTask(void* pvParameter) {
             printf("WiFi initialization completed\n");
 #endif
         } else {
-            // EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
             EventBits_t bits = xEventGroupGetBits(s_wifi_event_group);
-            printf("WiFi bits: %ld\n", bits);
 
             if (bits & WIFI_CONNECTED_BIT) {
-                printf("WiFi Connected\n");
                 http_rest_with_url();
 
                 parseJsonResponse();
@@ -582,9 +579,7 @@ void weatherApiTask(void* pvParameter) {
 #endif
             } else if (bits & WIFI_FAIL_BIT) {
                 esp_wifi_connect();
-                printf("WiFi Not Connected\n");
             } else {
-                printf("WiFi Unknown\n");
             }
 
 #ifdef DEBUG
