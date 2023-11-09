@@ -488,6 +488,13 @@ static void http_rest_with_url(void) {
 }
 
 // ********************************************************************************
+// Gets the current status for the WiFi connection
+// ********************************************************************************
+EventBits_t getWifiStatus(void) {
+    return xEventGroupGetBits(s_wifi_event_group);
+}
+
+// ********************************************************************************
 // ********************************************************************************
 void weatherApiTask(void* pvParameter) {
     while (1) {
@@ -499,7 +506,7 @@ void weatherApiTask(void* pvParameter) {
             printf("WiFi initialization completed\n");
 #endif
         } else {
-            EventBits_t bits = xEventGroupGetBits(s_wifi_event_group);
+            EventBits_t bits = getWifiStatus();
 
             if (bits & WIFI_CONNECTED_BIT) {
                 http_rest_with_url();
