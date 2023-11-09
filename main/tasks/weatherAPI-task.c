@@ -299,7 +299,6 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         } else {
             xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-            printf("Bits in event handler fail: %ld\n", xEventGroupGetBits(s_wifi_event_group));
         }
         printf("connect to the AP fail\n");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
