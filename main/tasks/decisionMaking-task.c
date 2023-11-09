@@ -18,12 +18,12 @@ extern uint32_t getLastRecordedWindSpeedMPH();
 // Activation Thresholds
 #define TEMPERATURE_ACTIVATION_THRESHOLD_F 70
 #define PRESSURE_ACTIVATION_THRESHOLD_MB 1000
-#define WIND_SPEED_ACTIVATION_THRESHOLD_MPH 150
+#define WIND_SPEED_ACTIVATION_THRESHOLD_MPH 30
 
 // Deactivation Thresholds
 #define TEMPERATURE_DEACTIVATION_THRESHOLD_F 65
 #define PRESSURE_DEACTIVATION_THRESHOLD_MB 1010
-#define WIND_SPEED_DEACTIVATION_THRESHOLD_MPH 100
+#define WIND_SPEED_DEACTIVATION_THRESHOLD_MPH 20
 
 // ********************************************************************************
 // ********************************************************************************
