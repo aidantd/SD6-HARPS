@@ -7,7 +7,6 @@
 #include "freertos/task.h"
 #include "peripherals/l289.h"
 #include "userHAL/dac.h"
-#include "utility/audio/audioFile.h"
 #include "utility/timers/timers.h"
 
 // External Dependencies
