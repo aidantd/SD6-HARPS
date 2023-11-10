@@ -38,7 +38,12 @@ void decisionMakingTask(void *pvParameter) {
 #ifdef DEMO
                 printf("\nThe computer has decided to close the shuttering system\n");
 #endif
+            } else if (getTemperature() >= TEMPERATURE_ACTIVATION_THRESHOLD_F && getPressure() <= PRESSURE_ACTIVATION_THRESHOLD_MB) {
+                setNeedToUpdateShutterPosition(true);
             }
+
+            // TODO: add a check for weatherAPI
+
             break;
         case SHUTTER_STATUS_CLOSED:
             if (lastRecordedSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
@@ -46,7 +51,12 @@ void decisionMakingTask(void *pvParameter) {
 #ifdef DEMO
                 printf("\nThe computer has decided to open the shuttering system\n");
 #endif
+            } else if (getTemperature() <= TEMPERATURE_DEACTIVATION_THRESHOLD_F && getPressure() >= PRESSURE_DEACTIVATION_THRESHOLD_MB) {
+                setNeedToUpdateShutterPosition(true);
             }
+
+            // TODO: add a check for weatherAPI
+
             break;
         default:
             break;
