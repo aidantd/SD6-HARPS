@@ -87,15 +87,15 @@ void pt_task(void *pvParameter) {
 
         error |= readFromBME(&bmeData.ctrlMeas, BME280_CTRL_MEAS, sizeof(bmeData));
 
-        temperature = calculateTemperature(calibrationData, bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
-        pressure = calculatePressure(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
-        humidity = calculateHumidity(calibrationData, bmeData.humidityMSB, bmeData.humidityLSB);
+        temperature = calculateTemperatureFahrenheit(calibrationData, bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
+        pressure = calculatePressureMillibars(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
+        humidity = calculateHumidityRH(calibrationData, bmeData.humidityMSB, bmeData.humidityLSB);
 
 #ifdef DEMO
         if (error == ESP_OK) {
-            printf("Temperature: %ld\n", temperature / 100);
-            printf("Pressure: %ld\n", pressure / 256);
-            printf("Humidity: %ld\n\n", humidity / 1024);
+            printf("Temperature: %ld Fahrenheit\n", temperature);
+            printf("Pressure: %ld Millibars\n", pressure);
+            printf("Humidity: %ld RH\n\n", humidity);
         } else {
             printf("Error reading from BME280: %d\n", error);
         }
@@ -103,8 +103,8 @@ void pt_task(void *pvParameter) {
 
 #ifdef DEBUG
         if (error == ESP_OK) {
-            printf("Temperature: %ld Celsius\n", temperature / 100);
-            printf("Pressure: %ld Pascels\n", pressure / 256);
+            printf("Temperature: %ld Fahrenheit\n", temperature / 100);
+            printf("Pressure: %ld Millibars\n", pressure / 256);
             printf("Humidity: %ld RH\n\n", humidity / 1024);
 
             printf("Ctrl Meas: %X\n", bmeData.ctrlMeas);

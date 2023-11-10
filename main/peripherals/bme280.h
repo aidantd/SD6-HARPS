@@ -88,6 +88,8 @@ enum registerPointerValuesBME {
 esp_err_t readFromBME(uint8_t *buffer, uint8_t registerAddress, size_t size);
 esp_err_t writeToBME(uint8_t *data, uint8_t registerAddress, size_t size);
 esp_err_t bme280_init(void);
-int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB);
-uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB);
-uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB);
+int32_t calculateTemperatureCelsius(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB);
+int32_t calculateTemperatureFahrenheit(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB);
+uint32_t calculatePressurePascals(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB);
+uint32_t calculatePressureMillibars(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB);
+uint32_t calculateHumidityRH(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB);
