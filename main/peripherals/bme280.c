@@ -59,7 +59,7 @@ esp_err_t bme280_init(void) {
 }
 
 // ********************************************************************************
-// Calculates the temperature read from the BME280 sensor
+// Calculates the temperature read from the BME280 sensor in degrees Celsius
 // @param calibrationData: The calibration data read from the BME280 sensor
 // @param temperatureMSB: The most significant byte of the temperature data register
 // @param temperatureLSB: The least significant byte of the temperature data register
@@ -69,7 +69,7 @@ esp_err_t bme280_init(void) {
 //      - Returns the temperature in degrees Celsius as a scaled whole number.
 //          - For example, an output of 5123 represents 51.23 degrees Celsius.
 // ********************************************************************************
-int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
+int32_t calculateTemperatureCelsius(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
     int32_t temperature32_t = (temperatureMSB << 12) | (temperatureLSB << 4) | (temperatureXLSB >> 4);
 
     // Based on the BME280 datasheet, the temperature calculation requires the following steps:
@@ -79,11 +79,26 @@ int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, u
 
     int32_t temperature = (temperature_fine * 5 + 128) >> 8;
 
-    return temperature;
+    return (temperature / 100);
 }
 
 // ********************************************************************************
-// Calculates the pressure read from the BME280 sensor
+// Calculates the temperature read from the BME280 sensor in degrees Fahrenheit
+// @param calibrationData: The calibration data read from the BME280 sensor
+// @param temperatureMSB: The most significant byte of the temperature data register
+// @param temperatureLSB: The least significant byte of the temperature data register
+// @param temperatureXLSB: The extra least significant byte of the temperature data register
+// @return: The temperature in degrees Fahrenheit as a scaled whole number
+// NOTE:
+//      - Returns the temperature in degrees Fahrenheit as a scaled whole number.
+//          - For example, an output of 5123 represents 51.23 degrees Fahrenheit.
+// ********************************************************************************
+int32_t calculateTemperatureFahrenheit(struct registerCalibrationMapBME calibrationData, uint8_t temperatureMSB, uint8_t temperatureLSB, uint8_t temperatureXLSB) {
+    return calculateTemperatureCelsius(calibrationData, temperatureMSB, temperatureLSB, temperatureXLSB) * 9 / 5 + 32;
+}
+
+// ********************************************************************************
+// Calculates the pressure read from the BME280 sensor in Pascals
 // @param calibrationData: The calibration data read from the BME280 sensor
 // @param pressureMSB: The most significant byte of the pressure data register
 // @param pressureLSB: The least significant byte of the pressure data register
@@ -93,7 +108,7 @@ int32_t calculateTemperature(struct registerCalibrationMapBME calibrationData, u
 //      - Returns the pressure in Pascals as a 32-bit unsigned integer in Q24.8 format (24 integer bits and 8 fractional bits).
 //          - For example, an output of 24674867 represents 24674867/256 = 96386.2 Pa = 963.862 hPa
 // ********************************************************************************
-uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB) {
+uint32_t calculatePressurePascals(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB) {
     int32_t pressure32_t = (pressureMSB << 12) | (pressureLSB << 4) | (pressureXLSB >> 4);
 
     // Based on the BME280 datasheet, the pressure calculation requires the following steps:
@@ -114,11 +129,26 @@ uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uin
     var2 = ((int64_t)calibrationData.dig_P8 * pressure) >> 19;
     pressure = ((pressure + var1 + var2) >> 8) + ((int64_t)calibrationData.dig_P7 << 4);
 
-    return (uint32_t)pressure;
+    return (uint32_t)(pressure / 256);
 }
 
 // ********************************************************************************
-// Calculates the humidity read from the BME280 sensor
+// Calculates the pressure read from the BME280 sensor in millibars
+// @param calibrationData: The calibration data read from the BME280 sensor
+// @param pressureMSB: The most significant byte of the pressure data register
+// @param pressureLSB: The least significant byte of the pressure data register
+// @param pressureXLSB: The extra least significant byte of the pressure data register
+// @return: The pressure in millibars as a 32-bit unsigned integer in Q24.8 format
+// NOTE:
+//      - Returns the pressure in millibars as a 32-bit unsigned integer in Q24.8 format (24 integer bits and 8 fractional bits).
+//          - For example, an output of 24674867 represents 24674867/256 = 96386.2 millibars
+// ********************************************************************************
+uint32_t calculatePressureMillibars(struct registerCalibrationMapBME calibrationData, uint8_t pressureMSB, uint8_t pressureLSB, uint8_t pressureXLSB) {
+    return calculatePressurePascals(calibrationData, pressureMSB, pressureLSB, pressureXLSB) / 100;
+}
+
+// ********************************************************************************
+// Calculates the humidity read from the BME280 sensor in %RH
 // @param calibrationData: The calibration data read from the BME280 sensor
 // @param humidityMSB: The most significant byte of the humidity data register
 // @param humidityLSB: The least significant byte of the humidity data register
@@ -128,7 +158,7 @@ uint32_t calculatePressure(struct registerCalibrationMapBME calibrationData, uin
 //          - For example, an output of 47445 represents 47445/1024 = 46.333 %RH.
 //      - Some crazy math is going on here so may want to quadruple check later
 // ********************************************************************************
-uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB) {
+uint32_t calculateHumidityRH(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB) {
     int32_t humidity32_t = (humidityMSB << 8) | humidityLSB;
 
     // Based on the BME280 datasheet, the humidity calculation requires the following steps:
@@ -138,5 +168,5 @@ uint32_t calculateHumidity(struct registerCalibrationMapBME calibrationData, uin
     var1 = (var1 < 0 ? 0 : var1);
     var1 = (var1 > 419430400 ? 419430400 : var1);
 
-    return (uint32_t)(var1 >> 12);
+    return (uint32_t)((var1 >> 12) / 1024);
 }
