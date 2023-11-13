@@ -6,12 +6,15 @@ idf_component_register(SRCS "main.c"
                         "tasks/decisionMaking-task.c"
                         "tasks/motor-task.c"
                         "tasks/pt-task.c"
+                        "tasks/screen-task.c"
                         "tasks/weatherAPI-task.c"
                         "userHal/adc.c"
                         "userHal/dac.c"
                         "userHal/i2c.c"
                         "userHal/uart.c"
                         "utility/timers/timers.c"
-                        INCLUDE_DIRS ".")
+                        INCLUDE_DIRS "."
+                        "utility/haglGraphics/hagl_hal/include"
+                        "utility/haglGraphics/hagl/include")
 
 target_compile_definitions(${COMPONENT_LIB} PRIVATE DEMO)
