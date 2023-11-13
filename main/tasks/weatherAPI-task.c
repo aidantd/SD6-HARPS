@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "/Users/aidan/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
+#include "/Users/spencer/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
 #include "cJSON.h"
 #include "esp_event.h"
 #include "esp_http_client.h"
