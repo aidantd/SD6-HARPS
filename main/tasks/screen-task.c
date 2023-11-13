@@ -11,7 +11,7 @@
 #include <driver/gpio.h>
 #include <font6x9.h>
 #include <fontx.h>
-#include <font9x18.h>
+#include "utility/haglGraphics/font9x18.h"
 
 void update_pressure(void * const display, uint32_t pressure){
 hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
