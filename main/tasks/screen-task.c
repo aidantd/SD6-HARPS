@@ -15,24 +15,49 @@
 #include "utility/haglGraphics/hagl_hal/include/hagl_hal.h"
 
 void update_pressure(void *const display, uint32_t pressure) {
+    char str[15] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
-    hagl_put_text(display, u"00000", 150, 110, color_black, font9x18);  // clears previous entry
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+    hagl_put_text(display, u"00000", 130, 110, color_black, font9x18);  // clears previous entry
+
+    hagl_put_text(display, u"00000", 130, 110, color_white, font9x18);
 }
 void update_temperature(void *const display, uint32_t temperature) {
+    char str[15] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
-    hagl_put_text(display, u"00000", 150, 110, color_black, font9x18);  // clears previous entry
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+    hagl_put_text(display, u"00000", 130, 90, color_black, font9x18);  // clears previous entry
+
+    hagl_put_text(display, u"00000", 130, 90, color_white, font9x18);
+}
+void update_wind(void *const display, uint32_t temperature) {
+    char str[15] = {0};
+    hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+    hagl_put_text(display, u"00000", 130, 130, color_black, font9x18);  // clears previous entry
+
+    hagl_put_text(display, u"00000", 130, 130, color_white, font9x18);
 }
 void update_precipitation(void *const display, uint32_t precipitation) {
+    char str[15] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
-    hagl_put_text(display, u"00000", 150, 110, color_black, font9x18);  // clears previous entry
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+    hagl_put_text(display, u"000000000000000000", 20, 170, color_black, font9x18);  // clears previous entry
+
+    hagl_put_text(display, u"000000000000000000", 20, 170, color_white, font9x18);
 }
 void update_api_status(void *const display, uint32_t pressure) {
+    char str[15] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
-    hagl_put_text(display, u"00000", 150, 110, color_black, font9x18);  // clears previous entry
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+    hagl_put_text(display, u"000000000000000000", 20, 205, color_black, font9x18);  // clears previous entry
+
+    hagl_put_text(display, u"000000000000000000", 20, 205, color_white, font9x18);
 }
 
 void clear_display(void *const display) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
     hagl_fill_rectangle(display, 0, 0, 320, 240, color_black);  // white background
 }
 
@@ -76,14 +101,21 @@ void screenTask(void *pvParameter) {
     while (1) {
         // unint32_t is the temp/pressure/wind
 
+        printf("writing to screen");
+
         hagl_backend_t *display = hagl_init();
 
         clear_display(display);
 
         draw_menu(display);
         draw_face(display, true);
+        update_temperature(display,0);
+        update_pressure(display,0);
+        update_wind(display,0);
+        update_api_status(display,0);
+        update_precipitation(display,0);
 
         draw_face(display, false);
-        vTaskDelay(500);
+        vTaskDelay(30000 / portTICK_PERIOD_MS);
     }
 }

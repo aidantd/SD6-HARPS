@@ -47,10 +47,10 @@ void app_main(void) {
         printf("Board initialized successfully\n");
     }
 
-    xTaskCreate(&pt_task, "pt_task", 2048, NULL, 5, NULL);
-    xTaskCreate(&weatherApiTask, "weatherAPI", 8192, NULL, 3, NULL);
-    xTaskCreate(&motorTask, "motorTask", 2048, NULL, 2, NULL);
-    xTaskCreate(&anemometerTask, "anemometer_task", 2048, NULL, 4, NULL);
-    xTaskCreate(&decisionMakingTask, "decisionMakingTask", 2048, NULL, 1, NULL);
-    xTaskCreate(&screenTask, "screenTask", 4092, NULL, 5, NULL);
+    // xTaskCreate(&pt_task, "pt_task", 2048, NULL, 5, NULL);
+    // xTaskCreate(&weatherApiTask, "weatherAPI", 8192, NULL, 3, NULL);
+    // xTaskCreate(&motorTask, "motorTask", 2048, NULL, 2, NULL);
+    // xTaskCreate(&anemometerTask, "anemometer_task", 2048, NULL, 4, NULL);
+    // xTaskCreate(&decisionMakingTask, "decisionMakingTask", 2048, NULL, 1, NULL);
+    xTaskCreate(&screenTask, "screenTask", 8192, NULL, 5, NULL);
 }
