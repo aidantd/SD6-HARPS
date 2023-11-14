@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "font6x9.h"
@@ -13,55 +12,70 @@
 #include "utility/haglGraphics/font9x18.h"
 #include "utility/haglGraphics/hagl/include/hagl.h"
 #include "utility/haglGraphics/hagl_hal/include/hagl_hal.h"
+#include "freertos/event_groups.h"
 
-void update_pressure(void *const display, uint32_t pressure) {
+#define WIFI_CONNECTED_BIT BIT0
+
+extern EventBits_t getWifiStatus(void);
+
+static int initializationStatus = true;
+static hagl_backend_t *display;
+
+void update_pressure(uint32_t pressure) {
     char str[15] = {0};
+    sprintf(str,"%ld",pressure);
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-    hagl_put_text(display, u"00000", 130, 110, color_black, font9x18);  // clears previous entry
 
-    hagl_put_text(display, u"00000", 130, 110, color_white, font9x18);
+    hagl_put_text(display, u"00000", 130, 110, color_black, font6x9);  // clears previous entry
+
+    hagl_put_text(display, (const wchar_t*) str, 130, 110, color_white, font6x9);
 }
-void update_temperature(void *const display, uint32_t temperature) {
+void update_temperature(uint32_t temperature) {
     char str[15] = {0};
+    sprintf(str,"%ld",temperature);
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-    hagl_put_text(display, u"00000", 130, 90, color_black, font9x18);  // clears previous entry
+    hagl_put_text(display, u"00000", 130, 90, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, u"00000", 130, 90, color_white, font9x18);
+    hagl_put_text(display, (const wchar_t*) str, 130, 90, color_white, font6x9);
 }
-void update_wind(void *const display, uint32_t temperature) {
+void update_wind(uint32_t wind) {
     char str[15] = {0};
+    sprintf(str,"%ld",wind);
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-    hagl_put_text(display, u"00000", 130, 130, color_black, font9x18);  // clears previous entry
+    hagl_put_text(display, u"00000", 130, 130, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, u"00000", 130, 130, color_white, font9x18);
+    hagl_put_text(display, (const wchar_t*) str, 130, 130, color_white, font6x9);
 }
-void update_precipitation(void *const display, uint32_t precipitation) {
-    char str[15] = {0};
+void update_precipitation(char condition[]) {
+    
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-    hagl_put_text(display, u"000000000000000000", 20, 170, color_black, font9x18);  // clears previous entry
+    hagl_put_text(display, u"000000000000000000", 20, 170, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, u"000000000000000000", 20, 170, color_white, font9x18);
+    hagl_put_text(display, (const wchar_t*) condition, 20, 170, color_white, font6x9);
 }
-void update_api_status(void *const display, uint32_t pressure) {
-    char str[15] = {0};
+void update_api_status(void) {
+                
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-    hagl_put_text(display, u"000000000000000000", 20, 205, color_black, font9x18);  // clears previous entry
-
-    hagl_put_text(display, u"000000000000000000", 20, 205, color_white, font9x18);
+    hagl_put_text(display, u"000000000000000000", 20, 205, color_black, font6x9);  // clears previous entry
+    EventBits_t bits = getWifiStatus();
+    if (bits & WIFI_CONNECTED_BIT)
+    hagl_put_text(display, u"Connected", 20, 205, color_white, font6x9);
+    else
+    hagl_put_text(display, u"Not Connected", 20, 205, color_white, font6x9);
 }
 
-void clear_display(void *const display) {
+void clear_display(void) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
     hagl_fill_rectangle(display, 0, 0, 320, 240, color_black);  // white background
 }
 
-void draw_face(void *const display, bool happy) {
+void draw_face(bool happy) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_green = hagl_color(display, 0x00, 0xff, 0x00);
     hagl_color_t color_red = hagl_color(display, 0x00, 0x00, 0xff);
@@ -84,38 +98,40 @@ void draw_face(void *const display, bool happy) {
     }
 }
 
-void draw_menu(void *const display) {
+void draw_menu(void) {
     hagl_color_t color_yellow = hagl_color(display, 0x00, 0xff, 0xff);
-    hagl_put_text(display, u"HARPS", 80, 5, color_yellow, font9x18);
+    hagl_put_text(display, u"HARPS", 80, 5, color_yellow, font6x9);
     hagl_draw_rectangle(display, 10, 30, 190, 230, color_yellow);  // data box
 
-    hagl_put_text(display, u"Orlando, Fl", 20, 55, color_yellow, font9x18);
-    hagl_put_text(display, u"Weather Conditions", 20, 73, color_yellow, font9x18);
-    hagl_put_text(display, u"Temperature:", 20, 90, color_yellow, font9x18);
-    hagl_put_text(display, u"Pressure:", 20, 110, color_yellow, font9x18);
-    hagl_put_text(display, u"Wind Speed:", 20, 130, color_yellow, font9x18);
-    hagl_put_text(display, u"Precipitation:", 20, 150, color_yellow, font9x18);
-    hagl_put_text(display, u"API Status:", 20, 190, color_yellow, font9x18);
+    hagl_put_text(display, u"Orlando, Fl", 20, 55, color_yellow, font6x9);
+    hagl_put_text(display, u"Weather Conditions", 20, 73, color_yellow, font6x9);
+    hagl_put_text(display, u"Temperature:", 20, 90, color_yellow, font6x9);
+    hagl_put_text(display, u"Pressure:", 20, 110, color_yellow, font6x9);
+    hagl_put_text(display, u"Wind Speed:", 20, 130, color_yellow, font6x9);
+    hagl_put_text(display, u"Precipitation:", 20, 150, color_yellow, font6x9);
+    hagl_put_text(display, u"API Status:", 20, 190, color_yellow, font6x9);
 }
 void screenTask(void *pvParameter) {
     while (1) {
-        // unint32_t is the temp/pressure/wind
+        if(initializationStatus) {
+           display = hagl_init(); 
+           initializationStatus = 0;
+        }
 
-        printf("writing to screen");
+        char conditions[] = "Rainy";
+        printf("writing to screen\n");
 
-        hagl_backend_t *display = hagl_init();
+        clear_display();
 
-        clear_display(display);
+        draw_menu();
+        draw_face(true);
+        update_temperature(0);
+        update_pressure(0);
+        update_wind(0);
+        update_api_status();
+        update_precipitation(conditions);
 
-        draw_menu(display);
-        draw_face(display, true);
-        update_temperature(display,0);
-        update_pressure(display,0);
-        update_wind(display,0);
-        update_api_status(display,0);
-        update_precipitation(display,0);
-
-        draw_face(display, false);
-        vTaskDelay(30000 / portTICK_PERIOD_MS);
+        draw_face(false);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
