@@ -16,6 +16,7 @@ extern void pt_task(void* pvParameter);
 extern void motorTask(void* pvParameter);
 extern void anemometerTask(void* pvParameter);
 extern void decisionMakingTask(void* pvParameter);
+extern void screenTask(void* pvParameter);
 
 // Declarations
 
@@ -51,4 +52,5 @@ void app_main(void) {
     xTaskCreate(&motorTask, "motorTask", 2048, NULL, 2, NULL);
     xTaskCreate(&anemometerTask, "anemometer_task", 2048, NULL, 4, NULL);
     xTaskCreate(&decisionMakingTask, "decisionMakingTask", 2048, NULL, 1, NULL);
+    xTaskCreate(&screenTask, "screenTask", 4092, NULL, 5, NULL);
 }
