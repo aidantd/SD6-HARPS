@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
+
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "font6x9.h"
@@ -13,49 +15,66 @@
 #include "utility/haglGraphics/hagl/include/hagl.h"
 #include "utility/haglGraphics/hagl_hal/include/hagl_hal.h"
 #include "freertos/event_groups.h"
+#include "peripherals/l289.h"
 
 #define WIFI_CONNECTED_BIT BIT0
 
 extern EventBits_t getWifiStatus(void);
+extern uint32_t getLastRecordedWindSpeedMPH();
+extern uint32_t getTemperature(void);
+extern uint32_t getPressure(void);
+extern int getWeatherCondition(char * pCondition);
+extern int getWeatherLocalTime(char * pCondition);
+
 
 static int initializationStatus = true;
 static hagl_backend_t *display;
 
 void update_pressure(uint32_t pressure) {
-    char str[15] = {0};
-    sprintf(str,"%ld",pressure);
+    wchar_t str[15] = {0};
+    swprintf(str, 15, L"%ld ", pressure);
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
 
     hagl_put_text(display, u"00000", 130, 110, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, (const wchar_t*) str, 130, 110, color_white, font6x9);
+    hagl_put_text(display, str, 130, 110, color_white, font6x9);
 }
 void update_temperature(uint32_t temperature) {
-    char str[15] = {0};
-    sprintf(str,"%ld",temperature);
+    wchar_t str[15] = {0};
+    swprintf(str, 15, L"%ld ", temperature);
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
     hagl_put_text(display, u"00000", 130, 90, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, (const wchar_t*) str, 130, 90, color_white, font6x9);
+    hagl_put_text(display, str, 130, 90, color_white, font6x9);
 }
 void update_wind(uint32_t wind) {
-    char str[15] = {0};
-    sprintf(str,"%ld",wind);
+    wchar_t str[15] = {0};
+    swprintf(str, 15, L"%ld ", wind);
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
     hagl_put_text(display, u"00000", 130, 130, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, (const wchar_t*) str, 130, 130, color_white, font6x9);
+    hagl_put_text(display, str, 130, 130, color_white, font6x9);
 }
-void update_precipitation(char condition[]) {
-    
+void update_condition(char condition[]) {
+    wchar_t str[30] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+
+    if(memcmp(condition, "", sizeof(condition)) != 0) {
+        swprintf(str, 30, L"%s ", condition);
+        printf("Made it to the not NULL\n");
+    } else {
+        swprintf(str, 30, L"N/A", condition);
+        printf("Made it to the NULL");
+    }
+
     hagl_put_text(display, u"000000000000000000", 20, 170, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, (const wchar_t*) condition, 20, 170, color_white, font6x9);
+    hagl_put_text(display, str, 20, 170, color_white, font6x9);
+
 }
 void update_api_status(void) {
                 
@@ -75,22 +94,22 @@ void clear_display(void) {
     hagl_fill_rectangle(display, 0, 0, 320, 240, color_black);  // white background
 }
 
-void draw_face(bool happy) {
+void draw_face(int shutterStatus) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_green = hagl_color(display, 0x00, 0xff, 0x00);
     hagl_color_t color_red = hagl_color(display, 0x00, 0x00, 0xff);
 
     // clear smiley area
     hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
-    if (happy) {
-        // happy smiley >>
+    if (shutterStatus == SHUTTER_STATUS_OPEN) {
+        // happy smiley
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_green);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_green);    // smiley
         hagl_fill_rounded_rectangle(display, 220, 135, 300, 145, 2, color_green);  // smiley
 
         hagl_fill_rounded_rectangle(display, 220, 124, 225, 140, 2, color_green);  // smiley
         hagl_fill_rounded_rectangle(display, 295, 124, 300, 140, 2, color_green);  // smiley
-    } else {
+    } else if(shutterStatus == SHUTTER_STATUS_CLOSED) {
         // danger smiley
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_red);    // smiley
@@ -108,7 +127,7 @@ void draw_menu(void) {
     hagl_put_text(display, u"Temperature:", 20, 90, color_yellow, font6x9);
     hagl_put_text(display, u"Pressure:", 20, 110, color_yellow, font6x9);
     hagl_put_text(display, u"Wind Speed:", 20, 130, color_yellow, font6x9);
-    hagl_put_text(display, u"Precipitation:", 20, 150, color_yellow, font6x9);
+    hagl_put_text(display, u"Conditions:", 20, 150, color_yellow, font6x9);
     hagl_put_text(display, u"API Status:", 20, 190, color_yellow, font6x9);
 }
 void screenTask(void *pvParameter) {
@@ -116,22 +135,25 @@ void screenTask(void *pvParameter) {
         if(initializationStatus) {
            display = hagl_init(); 
            initializationStatus = 0;
+           
+            clear_display();
+            draw_menu();
         }
 
-        char conditions[] = "Rainy";
+        char pCondition[256];
         printf("writing to screen\n");
 
-        clear_display();
-
-        draw_menu();
         draw_face(true);
-        update_temperature(0);
-        update_pressure(0);
-        update_wind(0);
+        update_temperature(getTemperature());
+        update_pressure(getPressure());
+        update_wind(getLastRecordedWindSpeedMPH());
         update_api_status();
-        update_precipitation(conditions);
 
-        draw_face(false);
+        getWeatherCondition(pCondition);
+        update_condition(pCondition);
+
+        draw_face(getShutterStatus());
+
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
