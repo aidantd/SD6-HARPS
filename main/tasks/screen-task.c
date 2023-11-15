@@ -19,16 +19,31 @@
 
 #define WIFI_CONNECTED_BIT BIT0
 
+
 extern EventBits_t getWifiStatus(void);
 extern uint32_t getLastRecordedWindSpeedMPH();
 extern uint32_t getTemperature(void);
 extern uint32_t getPressure(void);
 extern int getWeatherCondition(char * pCondition);
 extern int getWeatherLocalTime(char * pCondition);
+extern uint8_t getShutterStatus(void);
 
 
 static int initializationStatus = true;
 static hagl_backend_t *display;
+
+
+void update_time(char time[]) {
+    wchar_t str[30] = {0};
+    hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
+    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+    swprintf(str, 30, L"%s ", time);
+
+    hagl_put_text(display, u"00000", 20, 35, color_black, font6x9);  // clears previous entry
+
+    hagl_put_text(display, str, 20, 35, color_white, font6x9);
+}
+
 
 void update_pressure(uint32_t pressure) {
     wchar_t str[15] = {0};
@@ -63,7 +78,7 @@ void update_condition(char condition[]) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
 
-    if(memcmp(condition, "", sizeof(condition)) != 0) {
+    if(memcmp(condition, "", 1) != 0) {
         swprintf(str, 30, L"%s ", condition);
         printf("Made it to the not NULL\n");
     } else {
@@ -90,7 +105,6 @@ void update_api_status(void) {
 
 void clear_display(void) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
-    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
     hagl_fill_rectangle(display, 0, 0, 320, 240, color_black);  // white background
 }
 
@@ -141,6 +155,8 @@ void screenTask(void *pvParameter) {
         }
 
         char pCondition[256];
+        char pCondition_2[256];
+
         printf("writing to screen\n");
 
         draw_face(true);
@@ -151,6 +167,9 @@ void screenTask(void *pvParameter) {
 
         getWeatherCondition(pCondition);
         update_condition(pCondition);
+
+        getWeatherLocalTime(pCondition_2);
+        update_time(pCondition_2);
 
         draw_face(getShutterStatus());
 
