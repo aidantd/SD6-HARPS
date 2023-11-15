@@ -31,6 +31,7 @@ extern uint8_t getShutterStatus(void);
 
 static int initializationStatus = true;
 static hagl_backend_t *display;
+static u_int8_t flag = SHUTTER_STATUS_CLOSED;
 
 
 void update_time(char time[]) {
@@ -115,7 +116,7 @@ void draw_face(int shutterStatus) {
 
     // clear smiley area
     hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
-    if (shutterStatus == SHUTTER_STATUS_OPEN) {
+    if (shutterStatus == SHUTTER_STATUS_OPEN && flag == SHUTTER_STATUS_CLOSED) {
         // happy smiley
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_green);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_green);    // smiley
@@ -123,11 +124,14 @@ void draw_face(int shutterStatus) {
 
         hagl_fill_rounded_rectangle(display, 220, 124, 225, 140, 2, color_green);  // smiley
         hagl_fill_rounded_rectangle(display, 295, 124, 300, 140, 2, color_green);  // smiley
-    } else if(shutterStatus == SHUTTER_STATUS_CLOSED) {
+        flag = SHUTTER_STATUS_OPEN;
+
+    } else if(shutterStatus == SHUTTER_STATUS_CLOSED && flag == SHUTTER_STATUS_OPEN) {
         // danger smiley
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 220, 135, 300, 145, 2, color_red);  // smiley
+        flag = SHUTTER_STATUS_CLOSED;
     }
 }
 
