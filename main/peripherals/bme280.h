@@ -12,6 +12,8 @@
 #define BME280_ADDRESS 0x76
 
 struct registerDataMapBME {
+    uint8_t ctrlHum;
+    uint8_t status;
     uint8_t ctrlMeas;
     uint8_t config;
     uint8_t unusedRegister;  // This register depicts the jump in the position of the data registers

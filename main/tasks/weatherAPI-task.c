@@ -512,10 +512,10 @@ int getWeatherCondition(char* pCondition) {
 }
 
 // ********************************************************************************
-// Gets the current time in the weatherAPI response
+// Gets the current wind speed (MPH) in the weatherAPI response
 // ********************************************************************************
-int getWeatherLocalTime(char* pCondition) {
-    return memcpy(pCondition, weatherData.locationData.localtime, sizeof(weatherData.locationData.localtime));
+int getWeatherWindSpeedMPH(void) {
+    return weatherData.currentWeatherData.wind_mph;
 }
 
 // ********************************************************************************
