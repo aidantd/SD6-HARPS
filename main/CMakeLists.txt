@@ -43,3 +43,4 @@ idf_component_register(SRCS "main.c"
                         "utility/haglGraphics/hagl/include")
 
 target_compile_definitions(${COMPONENT_LIB} PRIVATE DEMO)
+target_compile_definitions(${COMPONENT_LIB} PRIVATE AIDAN)

@@ -2,7 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef AIDAN
+#include "/Users/aidan/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
+#endif
+
+#ifdef SPENCER
 #include "/Users/spencer/esp/esp-idf/components/lwip/include/apps/ping/ping_sock.h"
+#endif
+
 #include "cJSON.h"
 #include "esp_event.h"
 #include "esp_http_client.h"
@@ -499,14 +506,14 @@ EventBits_t getWifiStatus(void) {
 // ********************************************************************************
 // Gets the current condition in the weatherAPI response
 // ********************************************************************************
-int getWeatherCondition(char * pCondition) {
+int getWeatherCondition(char* pCondition) {
     return memcpy(pCondition, weatherData.currentWeatherData.conditionData.text, sizeof(weatherData.currentWeatherData.conditionData.text));
 }
 
 // ********************************************************************************
 // Gets the current time in the weatherAPI response
 // ********************************************************************************
-int getWeatherLocalTime(char * pCondition) {
+int getWeatherLocalTime(char* pCondition) {
     return memcpy(pCondition, weatherData.locationData.localtime, sizeof(weatherData.locationData.localtime));
 }
 

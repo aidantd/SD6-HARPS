@@ -1,8 +1,16 @@
 // Includes
 #include <stdio.h>
 
+#ifdef AIDAN
+#include "/Users/aidan/esp/esp-idf/components/driver/mcpwm/include/driver/mcpwm_types.h"
+#include "/Users/aidan/esp/esp-idf/components/driver/mcpwm/mcpwm_private.h"
+#endif
+
+#ifdef SPENCER
 #include "/Users/spencer/esp/esp-idf/components/driver/mcpwm/include/driver/mcpwm_types.h"
 #include "/Users/spencer/esp/esp-idf/components/driver/mcpwm/mcpwm_private.h"
+#endif
+
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "soc/mcpwm_periph.h"
