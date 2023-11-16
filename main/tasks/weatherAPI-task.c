@@ -496,6 +496,20 @@ EventBits_t getWifiStatus(void) {
 }
 
 // ********************************************************************************
+// Gets the current condition in the weatherAPI response
+// ********************************************************************************
+int getWeatherCondition(char* pCondition) {
+    return memcpy(pCondition, weatherData.currentWeatherData.conditionData.text, sizeof(weatherData.currentWeatherData.conditionData.text));
+}
+
+// ********************************************************************************
+// Gets the current wind speed (MPH) in the weatherAPI response
+// ********************************************************************************
+int getWeatherWindSpeedMPH(void) {
+    return weatherData.currentWeatherData.wind_mph;
+}
+
+// ********************************************************************************
 // ********************************************************************************
 void weatherApiTask(void* pvParameter) {
     while (1) {

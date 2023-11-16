@@ -1,11 +1,13 @@
 // Includes
 #include <stdio.h>
+#include <string.h>
 
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "peripherals/l289.h"
+#include "utility/api/weatherAPI.h"
 #include "utility/sensorBoard/led.h"
 
 // External Dependencies
@@ -13,6 +15,8 @@ extern uint32_t getTemperature(void);
 extern uint32_t getPressure(void);
 extern uint32_t getHumidity(void);
 extern uint32_t getLastRecordedWindSpeedMPH();
+extern int getWeatherCondition(char* pCondition);
+extern int getWeatherWindSpeedMPH(void);
 
 // Declarations
 
@@ -28,10 +32,16 @@ extern uint32_t getLastRecordedWindSpeedMPH();
 
 // ********************************************************************************
 // ********************************************************************************
-void decisionMakingTask(void *pvParameter) {
+void decisionMakingTask(void* pvParameter) {
     while (1) {
         // Check shutter status and determine if the system needs to update the shutters
         uint32_t lastRecordedSpeed = getLastRecordedWindSpeedMPH();
+
+        int weatherApiWindSpeed = getWeatherWindSpeedMPH();
+
+        char pCondition[MAX_FIELD_LENGTH];
+        getWeatherCondition(pCondition);
+
         switch (getShutterStatus()) {
         case SHUTTER_STATUS_OPEN:
             gpio_set_level(LED_GREEN, 1);
@@ -46,9 +56,9 @@ void decisionMakingTask(void *pvParameter) {
 #ifdef DEMO
                 printf("\nThe computer has decided to open the shuttering system\n");
 #endif
+            } else if (memcmp(pCondition, "Torrential rain shower", 23) == 0 || weatherApiWindSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {
+                setNeedToUpdateShutterPosition(true);
             }
-
-            // TODO: add a check for weatherAPI
 
             break;
         case SHUTTER_STATUS_CLOSED:
@@ -64,9 +74,9 @@ void decisionMakingTask(void *pvParameter) {
 #ifdef DEMO
                 printf("\nThe computer has decided to open the shuttering system\n");
 #endif
+            } else if (memcmp(pCondition, "Torrential rain shower", 23) != 0 || weatherApiWindSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
+                setNeedToUpdateShutterPosition(true);
             }
-
-            // TODO: add a check for weatherAPI
 
             break;
         default:
