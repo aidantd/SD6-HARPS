@@ -1,3 +1,4 @@
+// Includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,43 +9,48 @@
 #include "font6x9.h"
 #include "fontx.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "peripherals/l289.h"
 #include "rgb565.h"
 #include "utility/haglGraphics/font9x18.h"
 #include "utility/haglGraphics/hagl/include/hagl.h"
 #include "utility/haglGraphics/hagl_hal/include/hagl_hal.h"
-#include "freertos/event_groups.h"
-#include "peripherals/l289.h"
+#include "utility/timers/timers.h"
 
-#define WIFI_CONNECTED_BIT BIT0
-
-
+// External Dependencies
 extern EventBits_t getWifiStatus(void);
 extern uint32_t getLastRecordedWindSpeedMPH();
 extern uint32_t getTemperature(void);
 extern uint32_t getPressure(void);
-extern int getWeatherCondition(char * pCondition);
-extern int getWeatherLocalTime(char * pCondition);
+extern int getWeatherCondition(char *pCondition);
+extern int getWeatherLocalTime(char *pCondition);
 extern uint8_t getShutterStatus(void);
 
+// Declarations
+
+#define WIFI_CONNECTED_BIT BIT0
 
 static int initializationStatus = true;
 static hagl_backend_t *display;
 static u_int8_t flag = SHUTTER_STATUS_CLOSED;
 
+void update_time() {
+    wchar_t str[256] = {0};
+    if (getCurrentKnownEpochTime() != 0) {
+        swprintf(str, 15, L"%s ", asctime(getKnownEstTime()));
 
-void update_time(char time[]) {
-    wchar_t str[30] = {0};
-    hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
-    hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-    swprintf(str, 30, L"%s ", time);
+        wchar_t str[30] = {0};
+        hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
+        hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
+        swprintf(str, 30, L"%s ", time);
 
-    hagl_put_text(display, u"00000", 20, 35, color_black, font6x9);  // clears previous entry
+        hagl_put_text(display, u"00000", 20, 35, color_black, font6x9);  // clears previous entry
 
-    hagl_put_text(display, str, 20, 35, color_white, font6x9);
+        hagl_put_text(display, str, 20, 35, color_white, font6x9);
+    }
 }
-
 
 void update_pressure(uint32_t pressure) {
     wchar_t str[15] = {0};
@@ -79,7 +85,7 @@ void update_condition(char condition[]) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
 
-    if(memcmp(condition, "", 1) != 0) {
+    if (memcmp(condition, "", 1) != 0) {
         swprintf(str, 30, L"%s ", condition);
         printf("Made it to the not NULL\n");
     } else {
@@ -90,18 +96,16 @@ void update_condition(char condition[]) {
     hagl_put_text(display, u"000000000000000000", 20, 170, color_black, font6x9);  // clears previous entry
 
     hagl_put_text(display, str, 20, 170, color_white, font6x9);
-
 }
 void update_api_status(void) {
-                
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
     hagl_put_text(display, u"000000000000000000", 20, 205, color_black, font6x9);  // clears previous entry
     EventBits_t bits = getWifiStatus();
     if (bits & WIFI_CONNECTED_BIT)
-    hagl_put_text(display, u"Connected", 20, 205, color_white, font6x9);
+        hagl_put_text(display, u"Connected", 20, 205, color_white, font6x9);
     else
-    hagl_put_text(display, u"Not Connected", 20, 205, color_white, font6x9);
+        hagl_put_text(display, u"Not Connected", 20, 205, color_white, font6x9);
 }
 
 void clear_display(void) {
@@ -114,7 +118,6 @@ void draw_face(int shutterStatus) {
     hagl_color_t color_green = hagl_color(display, 0x00, 0xff, 0x00);
     hagl_color_t color_red = hagl_color(display, 0x00, 0x00, 0xff);
 
-    
     if (shutterStatus == SHUTTER_STATUS_OPEN && flag == SHUTTER_STATUS_CLOSED) {
         // happy smiley
         // clear smiley area
@@ -127,7 +130,7 @@ void draw_face(int shutterStatus) {
         hagl_fill_rounded_rectangle(display, 295, 124, 300, 140, 2, color_green);  // smiley
         flag = SHUTTER_STATUS_OPEN;
 
-    } else if(shutterStatus == SHUTTER_STATUS_CLOSED && flag == SHUTTER_STATUS_OPEN) {
+    } else if (shutterStatus == SHUTTER_STATUS_CLOSED && flag == SHUTTER_STATUS_OPEN) {
         // danger smiley
         // clear smiley area
         hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
@@ -153,30 +156,30 @@ void draw_menu(void) {
 }
 void screenTask(void *pvParameter) {
     while (1) {
-        if(initializationStatus) {
-           display = hagl_init(); 
-           initializationStatus = 0;
-           
+        if (initializationStatus) {
+            display = hagl_init();
+
             clear_display();
             draw_menu();
+
+            initializationStatus = 0;
         }
 
-        char pCondition[256];
-        char pCondition_2[256];
+        char pWeatherApiCondition[256];
 
-        printf("writing to screen\n");
+#ifdef DEBUG
+        printf("Updating the screen\n");
+#endif
 
-        draw_face(true);
         update_temperature(getTemperature());
         update_pressure(getPressure());
         update_wind(getLastRecordedWindSpeedMPH());
         update_api_status();
 
-        getWeatherCondition(pCondition);
-        update_condition(pCondition);
+        getWeatherCondition(pWeatherApiCondition);
+        update_condition(pWeatherApiCondition);
 
-        getWeatherLocalTime(pCondition_2);
-        update_time(pCondition_2);
+        update_time();
 
         draw_face(getShutterStatus());
 
