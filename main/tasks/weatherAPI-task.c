@@ -507,8 +507,8 @@ EventBits_t getWifiStatus(void) {
 // ********************************************************************************
 // Gets the current condition in the weatherAPI response
 // ********************************************************************************
-int getWeatherCondition(char* pCondition) {
-    return memcpy(pCondition, weatherData.currentWeatherData.conditionData.text, sizeof(weatherData.currentWeatherData.conditionData.text));
+void getWeatherCondition(char* pCondition) {
+    memcpy(pCondition, &weatherData.currentWeatherData.conditionData.text, sizeof(weatherData.currentWeatherData.conditionData.text));
 }
 
 // ********************************************************************************

@@ -24,8 +24,7 @@ extern EventBits_t getWifiStatus(void);
 extern uint32_t getLastRecordedWindSpeedMPH();
 extern uint32_t getTemperature(void);
 extern uint32_t getPressure(void);
-extern int getWeatherCondition(char *pCondition);
-extern int getWeatherLocalTime(char *pCondition);
+extern void getWeatherCondition(char *pCondition);
 extern uint8_t getShutterStatus(void);
 
 // Declarations
@@ -55,12 +54,10 @@ static lastWrittenScreenData_t lastWrittenScreenData = {
 void update_time() {
     wchar_t str[256] = {0};
     if (getCurrentKnownEpochTime() != 0) {
-        swprintf(str, 15, L"%s ", asctime(getKnownEstTime()));
+        swprintf(str, 256, L"%s ", asctime(getKnownEstTime()));
 
-        wchar_t str[30] = {0};
         hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
         hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
-        swprintf(str, 30, L"%s ", time);
 
         hagl_put_text(display, u"00000", 20, 35, color_black, font6x9);  // clears previous entry
 
@@ -116,15 +113,15 @@ void update_wind(uint32_t wind) {
 // @param condition: The weather condition to update the screen with
 // ********************************************************************************
 void update_condition(char condition[]) {
-    wchar_t str[30] = {0};
+    wchar_t str[256] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
 
     if (memcmp(condition, "", 1) != 0) {
-        swprintf(str, 30, L"%s ", condition);
+        swprintf(str, 256, L"%s", condition);
         printf("Made it to the not NULL\n");
     } else {
-        swprintf(str, 30, L"N/A", condition);
+        swprintf(str, 256, L"N/A", condition);
         printf("Made it to the NULL");
     }
 
