@@ -66,6 +66,14 @@ uint8_t isTimeoutElapsed(uint64_t timeout) {
 }
 
 // ********************************************************************************
+// Gets the current known epoch time
+// @return: Current known epoch time
+// ********************************************************************************
+time_t getCurrentKnownEpochTime(void) {
+    return currentKnownEpochTime;
+}
+
+// ********************************************************************************
 // Sets the current known epoch time
 // @param epochTime: Epoch time to set
 // ********************************************************************************

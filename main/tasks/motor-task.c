@@ -56,12 +56,13 @@ void motorTask(void *pvParameter) {
 #endif
         }
 #ifdef DEBUG
-        printf("Motor task\n");
-        printf("Shutter time amount: %llu\n", shutterTimeout);
         printf("GPTimer count: %llu\n", getGPTimerCount());
 #endif
 
-        if (getGPTimerCount() % SECONDS_PER_MICROSECOND == 0) {
+        if ((getGPTimerCount() % SECONDS_PER_MICROSECOND) > 0 && getCurrentKnownEpochTime() != 0) {
+#ifdef DEBUG
+            printf("We are incrementing the current known epoch time\n");
+#endif
             incrementCurrentKnownEpochTime(1);
         }
 

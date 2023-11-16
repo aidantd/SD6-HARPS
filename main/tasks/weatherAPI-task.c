@@ -514,6 +514,10 @@ void weatherApiTask(void* pvParameter) {
 
                 parseJsonResponse();
 
+                if (weatherData.locationData.localtime_epoch != 0) {
+                    setCurrentKnownEpochTime(weatherData.locationData.localtime_epoch);
+                }
+
 #ifdef DEMO
                 printf("\n\n*******************************************\n");
                 printf("Location: %s, %s, %s\n", weatherData.locationData.name, weatherData.locationData.region, weatherData.locationData.country);
