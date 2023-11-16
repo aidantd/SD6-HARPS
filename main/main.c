@@ -8,6 +8,7 @@
 #include "userHAL/dac.h"
 #include "userHAL/i2c.h"
 #include "userHAL/uart.h"
+#include "utility/sensorBoard/led.h"
 #include "utility/timers/timers.h"
 
 // External Dependencies
@@ -33,6 +34,8 @@ esp_err_t boardInit(void) {
     error |= initGPTimer();
 
     error |= initL289();
+
+    error |= initLeds();
 
     return error;
 }

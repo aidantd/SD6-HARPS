@@ -53,6 +53,7 @@
     "ctime": "c",
     "time.h": "c",
     "types.h": "c",
-    "compare": "c"
+    "compare": "c",
+    "led.h": "c"
   }
 }

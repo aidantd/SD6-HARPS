@@ -6,6 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "peripherals/l289.h"
+#include "utility/sensorBoard/led.h"
 
 // External Dependencies
 extern uint32_t getTemperature(void);
@@ -33,6 +34,8 @@ void decisionMakingTask(void *pvParameter) {
         uint32_t lastRecordedSpeed = getLastRecordedWindSpeedMPH();
         switch (getShutterStatus()) {
         case SHUTTER_STATUS_OPEN:
+            gpio_set_level(LED_GREEN, 1);
+
             if (lastRecordedSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {
                 setNeedToUpdateShutterPosition(true);
 #ifdef DEMO
@@ -49,6 +52,8 @@ void decisionMakingTask(void *pvParameter) {
 
             break;
         case SHUTTER_STATUS_CLOSED:
+            gpio_set_level(LED_RED, 1);
+
             if (lastRecordedSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
                 setNeedToUpdateShutterPosition(true);
 #ifdef DEMO

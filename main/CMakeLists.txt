@@ -11,6 +11,7 @@ idf_component_register(SRCS "main.c"
                         "userHal/dac.c"
                         "userHal/i2c.c"
                         "userHal/uart.c"
+                        "utility/sensorBoard/led.c"
                         "utility/timers/timers.c"
                         INCLUDE_DIRS ".")
 
