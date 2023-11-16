@@ -514,7 +514,7 @@ void weatherApiTask(void* pvParameter) {
 
                 parseJsonResponse();
 
-                if (weatherData.locationData.localtime_epoch != 0) {
+                if (weatherData.locationData.localtime_epoch != 0 && getCurrentKnownEpochTime() == 0) {
                     setCurrentKnownEpochTime(weatherData.locationData.localtime_epoch);
                 }
 
