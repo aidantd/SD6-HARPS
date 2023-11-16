@@ -6,6 +6,8 @@
 // Declarations
 gptimer_handle_t gptimer = NULL;
 
+static time_t currentKnownEpochTime = 0;
+
 // ********************************************************************************
 // Initializes the general purpose timer
 // @return: ESP_OK if successful, ESP_FAIL if unsuccessful
@@ -61,4 +63,33 @@ uint8_t isTimeoutElapsed(uint64_t timeout) {
     }
 
     return 0;
+}
+
+// ********************************************************************************
+// Sets the current known epoch time
+// @param epochTime: Epoch time to set
+// ********************************************************************************
+void setCurrentKnownEpochTime(time_t epochTime) {
+    if (epochTime > currentKnownEpochTime) {
+        currentKnownEpochTime = epochTime;
+    }
+}
+
+// ********************************************************************************
+// Increments the current known epoch time by the given amount
+// @param amount: Amount to increment the current known epoch time by
+// ********************************************************************************
+void incrementCurrentKnownEpochTime(time_t amount) {
+    currentKnownEpochTime += amount;
+}
+
+// ********************************************************************************
+// Gets the known time in 24 hour format
+// return: Known time in 24 hour format
+// ********************************************************************************
+struct tm* getKnownEstTime(void) {
+    setenv("TZ", "EST5EDT", 1);
+    tzset();
+
+    return localtime(&currentKnownEpochTime);
 }

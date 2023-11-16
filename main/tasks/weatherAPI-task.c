@@ -19,6 +19,7 @@
 #include "lwip/sys.h"
 #include "nvs_flash.h"
 #include "utility/api/weatherAPI.h"
+#include "utility/timers/timers.h"
 
 // External Dependencies
 
