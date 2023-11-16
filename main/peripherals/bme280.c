@@ -47,13 +47,13 @@ esp_err_t bme280_init(void) {
 
     error |= writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
 
-    uint8_t writeCtrlMeas = CTRL_MEAS_OVERSAMPLING_TEMPERATURE | CTRL_MEAS_OVERSAMPLING_PRESSURE | CTRL_MEAS_FORCED_MODE;
-
-    error |= writeToBME(&writeCtrlMeas, BME280_CTRL_MEAS, sizeof(writeCtrlMeas));
-
     uint8_t writeDataCtrlHum = CTRL_HUM_OVERSAMPLING_HUMIDITY;
 
     error |= writeToBME(&writeDataCtrlHum, BME280_CTRL_HUM, sizeof(writeDataCtrlHum));
+
+    uint8_t writeCtrlMeas = CTRL_MEAS_OVERSAMPLING_TEMPERATURE | CTRL_MEAS_OVERSAMPLING_PRESSURE | CTRL_MEAS_FORCED_MODE;
+
+    error |= writeToBME(&writeCtrlMeas, BME280_CTRL_MEAS, sizeof(writeCtrlMeas));
 
     return error;
 }
