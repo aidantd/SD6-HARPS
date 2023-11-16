@@ -52,6 +52,7 @@
     "dac_cosine.h": "c",
     "ctime": "c",
     "time.h": "c",
-    "types.h": "c"
+    "types.h": "c",
+    "compare": "c"
   }
 }

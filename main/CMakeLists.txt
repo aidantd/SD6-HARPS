@@ -14,4 +14,4 @@ idf_component_register(SRCS "main.c"
                         "utility/timers/timers.c"
                         INCLUDE_DIRS ".")
 
-target_compile_definitions(${COMPONENT_LIB} PRIVATE SENSORS)
+target_compile_definitions(${COMPONENT_LIB} PRIVATE DEMO)
