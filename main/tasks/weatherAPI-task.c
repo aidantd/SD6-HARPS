@@ -19,6 +19,7 @@
 #include "lwip/sys.h"
 #include "nvs_flash.h"
 #include "utility/api/weatherAPI.h"
+#include "utility/timers/timers.h"
 
 // External Dependencies
 
@@ -512,6 +513,10 @@ void weatherApiTask(void* pvParameter) {
                 http_rest_with_url();
 
                 parseJsonResponse();
+
+                if (weatherData.locationData.localtime_epoch != 0 && getCurrentKnownEpochTime() == 0) {
+                    setCurrentKnownEpochTime(weatherData.locationData.localtime_epoch);
+                }
 
 #ifdef DEMO
                 printf("\n\n*******************************************\n");

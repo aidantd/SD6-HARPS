@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.port": "/dev/cu.usbserial-21210",
+  "idf.port": "/dev/cu.usbserial-21240",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
@@ -49,6 +49,9 @@
     "dac_types.h": "c",
     "dac_continuous.h": "c",
     "stdbool.h": "c",
-    "dac_cosine.h": "c"
+    "dac_cosine.h": "c",
+    "ctime": "c",
+    "time.h": "c",
+    "types.h": "c"
   }
 }
