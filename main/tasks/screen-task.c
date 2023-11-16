@@ -29,12 +29,21 @@ extern int getWeatherLocalTime(char *pCondition);
 extern uint8_t getShutterStatus(void);
 
 // Declarations
-
 #define WIFI_CONNECTED_BIT BIT0
 
 static int initializationStatus = true;
 static hagl_backend_t *display;
 static u_int8_t flag = SHUTTER_STATUS_CLOSED;
+
+typedef struct {
+    uint32_t pressure;
+    uint32_t temperature;
+    uint32_t wind;
+    uint8_t shutterStatus;
+    char condition[256];
+} lastWrittenScreenData_t;
+
+static lastWrittenScreenData_t lastWrittenScreenData;
 
 void update_time() {
     wchar_t str[256] = {0};
@@ -162,6 +171,8 @@ void screenTask(void *pvParameter) {
             clear_display();
             draw_menu();
 
+            draw_face(getShutterStatus());
+
             initializationStatus = 0;
         }
 
@@ -171,17 +182,29 @@ void screenTask(void *pvParameter) {
         printf("Updating the screen\n");
 #endif
 
-        update_temperature(getTemperature());
-        update_pressure(getPressure());
-        update_wind(getLastRecordedWindSpeedMPH());
+        if (getTemperature() != lastWrittenScreenData.temperature) {
+            lastWrittenScreenData.temperature = getTemperature();
+            update_temperature(lastWrittenScreenData.temperature);
+        }
+        if (getPressure() != lastWrittenScreenData.pressure) {
+            lastWrittenScreenData.pressure = getPressure();
+            update_pressure(lastWrittenScreenData.pressure);
+        }
+        if (getLastRecordedWindSpeedMPH() != lastWrittenScreenData.wind) {
+            lastWrittenScreenData.wind = getLastRecordedWindSpeedMPH();
+            update_wind(lastWrittenScreenData.wind);
+        }
+        if (getShutterStatus() != lastWrittenScreenData.shutterStatus) {
+            lastWrittenScreenData.shutterStatus = getShutterStatus();
+            draw_face(lastWrittenScreenData.shutterStatus);
+        }
+
         update_api_status();
 
         getWeatherCondition(pWeatherApiCondition);
         update_condition(pWeatherApiCondition);
 
         update_time();
-
-        draw_face(getShutterStatus());
 
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
