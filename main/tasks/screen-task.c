@@ -33,18 +33,25 @@ extern uint8_t getShutterStatus(void);
 
 static int initializationStatus = true;
 static hagl_backend_t *display;
-static u_int8_t flag = SHUTTER_STATUS_CLOSED;
 
 typedef struct {
-    uint32_t pressure;
-    uint32_t temperature;
-    uint32_t wind;
-    uint8_t shutterStatus;
+    int32_t pressure;
+    int32_t temperature;
+    int32_t wind;
+    int8_t shutterStatus;
     char condition[256];
 } lastWrittenScreenData_t;
 
-static lastWrittenScreenData_t lastWrittenScreenData;
+static lastWrittenScreenData_t lastWrittenScreenData = {
+    .pressure = -1,
+    .temperature = -1,
+    .wind = -1,
+    .shutterStatus = -1,
+    .condition = ""};
 
+// ********************************************************************************
+// Updates the time on the screen
+// ********************************************************************************
 void update_time() {
     wchar_t str[256] = {0};
     if (getCurrentKnownEpochTime() != 0) {
@@ -61,6 +68,10 @@ void update_time() {
     }
 }
 
+// ********************************************************************************
+// Updates the pressure on the screen
+// @param pressure: The pressure to update the screen with
+// ********************************************************************************
 void update_pressure(uint32_t pressure) {
     wchar_t str[15] = {0};
     swprintf(str, 15, L"%ld ", pressure);
@@ -71,6 +82,11 @@ void update_pressure(uint32_t pressure) {
 
     hagl_put_text(display, str, 130, 110, color_white, font6x9);
 }
+
+// ********************************************************************************
+// Updates the temperature on the screen
+// @param temperature: The temperature to update the screen with
+// ********************************************************************************
 void update_temperature(uint32_t temperature) {
     wchar_t str[15] = {0};
     swprintf(str, 15, L"%ld ", temperature);
@@ -80,6 +96,11 @@ void update_temperature(uint32_t temperature) {
 
     hagl_put_text(display, str, 130, 90, color_white, font6x9);
 }
+
+// ********************************************************************************
+// Updates the wind speed on the screen
+// @param wind: The wind speed to update the screen with
+// ********************************************************************************
 void update_wind(uint32_t wind) {
     wchar_t str[15] = {0};
     swprintf(str, 15, L"%ld ", wind);
@@ -89,6 +110,11 @@ void update_wind(uint32_t wind) {
 
     hagl_put_text(display, str, 130, 130, color_white, font6x9);
 }
+
+// ********************************************************************************
+// Updates the weather condition on the screen
+// @param condition: The weather condition to update the screen with
+// ********************************************************************************
 void update_condition(char condition[]) {
     wchar_t str[30] = {0};
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
@@ -106,6 +132,10 @@ void update_condition(char condition[]) {
 
     hagl_put_text(display, str, 20, 170, color_white, font6x9);
 }
+
+// ********************************************************************************
+// Updates the API status on the screen
+// ********************************************************************************
 void update_api_status(void) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_white = hagl_color(display, 0xff, 0xff, 0xff);
@@ -117,17 +147,24 @@ void update_api_status(void) {
         hagl_put_text(display, u"Not Connected", 20, 205, color_white, font6x9);
 }
 
+// ********************************************************************************
+// Clears the display
+// ********************************************************************************
 void clear_display(void) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_fill_rectangle(display, 0, 0, 320, 240, color_black);  // white background
 }
 
+// ********************************************************************************
+// Draws the face on the screen
+// @param shutterStatus: The shutter status to draw the face with
+// ********************************************************************************
 void draw_face(int shutterStatus) {
     hagl_color_t color_black = hagl_color(display, 0x00, 0x00, 0x00);
     hagl_color_t color_green = hagl_color(display, 0x00, 0xff, 0x00);
     hagl_color_t color_red = hagl_color(display, 0x00, 0x00, 0xff);
 
-    if (shutterStatus == SHUTTER_STATUS_OPEN && flag == SHUTTER_STATUS_CLOSED) {
+    if (shutterStatus == SHUTTER_STATUS_OPEN) {
         // happy smiley
         // clear smiley area
         hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
@@ -137,19 +174,20 @@ void draw_face(int shutterStatus) {
 
         hagl_fill_rounded_rectangle(display, 220, 124, 225, 140, 2, color_green);  // smiley
         hagl_fill_rounded_rectangle(display, 295, 124, 300, 140, 2, color_green);  // smiley
-        flag = SHUTTER_STATUS_OPEN;
 
-    } else if (shutterStatus == SHUTTER_STATUS_CLOSED && flag == SHUTTER_STATUS_OPEN) {
+    } else if (shutterStatus == SHUTTER_STATUS_CLOSED) {
         // danger smiley
         // clear smiley area
         hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 220, 135, 300, 145, 2, color_red);  // smiley
-        flag = SHUTTER_STATUS_CLOSED;
     }
 }
 
+// ********************************************************************************
+// Draws the menu on the screen
+// ********************************************************************************
 void draw_menu(void) {
     hagl_color_t color_yellow = hagl_color(display, 0x00, 0xff, 0xff);
     hagl_put_text(display, u"HARPS", 80, 5, color_yellow, font6x9);
@@ -163,6 +201,9 @@ void draw_menu(void) {
     hagl_put_text(display, u"Conditions:", 20, 150, color_yellow, font6x9);
     hagl_put_text(display, u"API Status:", 20, 190, color_yellow, font6x9);
 }
+
+// ********************************************************************************
+// ********************************************************************************
 void screenTask(void *pvParameter) {
     while (1) {
         if (initializationStatus) {
@@ -170,8 +211,6 @@ void screenTask(void *pvParameter) {
 
             clear_display();
             draw_menu();
-
-            draw_face(getShutterStatus());
 
             initializationStatus = 0;
         }
