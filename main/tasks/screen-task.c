@@ -114,10 +114,11 @@ void draw_face(int shutterStatus) {
     hagl_color_t color_green = hagl_color(display, 0x00, 0xff, 0x00);
     hagl_color_t color_red = hagl_color(display, 0x00, 0x00, 0xff);
 
-    // clear smiley area
-    hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
+    
     if (shutterStatus == SHUTTER_STATUS_OPEN && flag == SHUTTER_STATUS_CLOSED) {
         // happy smiley
+        // clear smiley area
+        hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_green);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_green);    // smiley
         hagl_fill_rounded_rectangle(display, 220, 135, 300, 145, 2, color_green);  // smiley
@@ -128,6 +129,8 @@ void draw_face(int shutterStatus) {
 
     } else if(shutterStatus == SHUTTER_STATUS_CLOSED && flag == SHUTTER_STATUS_OPEN) {
         // danger smiley
+        // clear smiley area
+        hagl_fill_rectangle(display, 220, 65, 300, 145, color_black);
         hagl_fill_rounded_rectangle(display, 230, 65, 250, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 270, 65, 290, 95, 2, color_red);    // smiley
         hagl_fill_rounded_rectangle(display, 220, 135, 300, 145, 2, color_red);  // smiley
