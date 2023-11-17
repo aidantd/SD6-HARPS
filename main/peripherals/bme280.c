@@ -12,7 +12,7 @@
 #define CTRL_MEAS_OVERSAMPLING_TEMPERATURE 0b00100000
 #define CTRL_MEAS_FORCED_MODE 0b00000011
 
-#define CTRL_HUM_OVERSAMPLING_HUMIDITY 0b00000001
+#define CTRL_HUM_OVERSAMPLING_HUMIDITY 0b00000100
 
 static int32_t temperature_fine;
 
@@ -47,13 +47,13 @@ esp_err_t bme280_init(void) {
 
     error |= writeToBME(&writeDataConfig, BME280_REGISTER_CONFIG, sizeof(writeDataConfig));
 
-    uint8_t writeCtrlMeas = CTRL_MEAS_OVERSAMPLING_TEMPERATURE | CTRL_MEAS_OVERSAMPLING_PRESSURE | CTRL_MEAS_FORCED_MODE;
-
-    error |= writeToBME(&writeCtrlMeas, BME280_CTRL_MEAS, sizeof(writeCtrlMeas));
-
     uint8_t writeDataCtrlHum = CTRL_HUM_OVERSAMPLING_HUMIDITY;
 
     error |= writeToBME(&writeDataCtrlHum, BME280_CTRL_HUM, sizeof(writeDataCtrlHum));
+
+    uint8_t writeCtrlMeas = CTRL_MEAS_OVERSAMPLING_TEMPERATURE | CTRL_MEAS_OVERSAMPLING_PRESSURE | CTRL_MEAS_FORCED_MODE;
+
+    error |= writeToBME(&writeCtrlMeas, BME280_CTRL_MEAS, sizeof(writeCtrlMeas));
 
     return error;
 }
@@ -156,17 +156,15 @@ uint32_t calculatePressureMillibars(struct registerCalibrationMapBME calibration
 // NOTE:
 //      - Returns the humidity in %RH as an unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
 //          - For example, an output of 47445 represents 47445/1024 = 46.333 %RH.
-//      - Some crazy math is going on here so may want to quadruple check later
 // ********************************************************************************
 uint32_t calculateHumidityRH(struct registerCalibrationMapBME calibrationData, uint8_t humidityMSB, uint8_t humidityLSB) {
     int32_t humidity32_t = (humidityMSB << 8) | humidityLSB;
+    int32_t var1;
+    var1 = temperature_fine - ((int32_t)76800);
 
-    // Based on the BME280 datasheet, the humidity calculation requires the following steps:
-    int32_t var1 = temperature_fine - ((int32_t)76800);
-    var1 = (((((humidity32_t << 14) - (((int32_t)calibrationData.dig_H4) << 20) - (((int32_t)calibrationData.dig_H5) * var1)) + ((int32_t)16384)) >> 15) * ((((((var1 * ((int32_t)calibrationData.dig_H6) >> 10) * (((var1 * ((int32_t)calibrationData.dig_H3) >> 11) + ((int32_t)32768)) >> 10)) + ((int32_t)2097152)) * ((int32_t)calibrationData.dig_H2) + 8192) >> 14)));
+    var1 = (((((humidity32_t << 14) - (((int32_t)calibrationData.dig_H4) << 20) - (((int32_t)calibrationData.dig_H5) * var1)) + ((int32_t)16384)) >> 15) * (((((((var1 * ((int32_t)calibrationData.dig_H6)) >> 10) * (((var1 * ((int32_t)calibrationData.dig_H3)) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) * ((int32_t)calibrationData.dig_H2) + 8192) >> 14));
     var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)calibrationData.dig_H1)) >> 4));
     var1 = (var1 < 0 ? 0 : var1);
     var1 = (var1 > 419430400 ? 419430400 : var1);
-
-    return (uint32_t)((var1 >> 12) / 1024);
+    return (uint32_t)(var1 >> 12) / 1024;
 }

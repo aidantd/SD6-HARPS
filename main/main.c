@@ -8,6 +8,7 @@
 #include "userHAL/dac.h"
 #include "userHAL/i2c.h"
 #include "userHAL/uart.h"
+#include "utility/sensorBoard/led.h"
 #include "utility/timers/timers.h"
 
 // External Dependencies
@@ -16,6 +17,7 @@ extern void pt_task(void* pvParameter);
 extern void motorTask(void* pvParameter);
 extern void anemometerTask(void* pvParameter);
 extern void decisionMakingTask(void* pvParameter);
+extern void screenTask(void* pvParameter);
 
 // Declarations
 
@@ -34,6 +36,8 @@ esp_err_t boardInit(void) {
 
     error |= initL289();
 
+    error |= initLeds();
+
     return error;
 }
 
@@ -51,4 +55,5 @@ void app_main(void) {
     xTaskCreate(&motorTask, "motorTask", 2048, NULL, 2, NULL);
     xTaskCreate(&anemometerTask, "anemometer_task", 2048, NULL, 4, NULL);
     xTaskCreate(&decisionMakingTask, "decisionMakingTask", 2048, NULL, 1, NULL);
+    xTaskCreate(&screenTask, "screenTask", 8192, NULL, 5, NULL);
 }

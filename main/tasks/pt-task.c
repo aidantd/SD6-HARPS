@@ -85,7 +85,7 @@ void pt_task(void *pvParameter) {
 
         memset(&bmeData, 0, sizeof(bmeData));
 
-        error |= readFromBME(&bmeData.ctrlMeas, BME280_CTRL_MEAS, sizeof(bmeData));
+        error |= readFromBME(&bmeData.ctrlHum, BME280_CTRL_HUM, sizeof(bmeData));
 
         temperature = calculateTemperatureFahrenheit(calibrationData, bmeData.temperatureMSB, bmeData.temperatureLSB, bmeData.temperatureXLSB);
         pressure = calculatePressureMillibars(calibrationData, bmeData.pressureMSB, bmeData.pressureLSB, bmeData.pressureXLSB);
@@ -103,10 +103,12 @@ void pt_task(void *pvParameter) {
 
 #ifdef DEBUG
         if (error == ESP_OK) {
-            printf("Temperature: %ld Fahrenheit\n", temperature / 100);
-            printf("Pressure: %ld Millibars\n", pressure / 256);
-            printf("Humidity: %ld RH\n\n", humidity / 1024);
+            printf("Temperature: %ld Fahrenheit\n", temperature);
+            printf("Pressure: %ld Millibars\n", pressure);
+            printf("Humidity: %ld RH\n\n", humidity);
 
+            printf("Ctrl Hum: %X\n", bmeData.ctrlHum);
+            printf("Status: %X\n", bmeData.status);
             printf("Ctrl Meas: %X\n", bmeData.ctrlMeas);
             printf("Config: %X\n", bmeData.config);
             printf("Pressure MSB: %X\n", bmeData.pressureMSB);
