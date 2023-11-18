@@ -14,7 +14,6 @@
 #include "freertos/task.h"
 #include "peripherals/l289.h"
 #include "rgb565.h"
-#include "utility/haglGraphics/font9x18.h"
 #include "utility/haglGraphics/hagl/include/hagl.h"
 #include "utility/haglGraphics/hagl_hal/include/hagl_hal.h"
 #include "utility/timers/timers.h"
@@ -119,10 +118,14 @@ void update_condition(char condition[]) {
 
     if (memcmp(condition, "", 1) != 0) {
         swprintf(str, 256, L"%s", condition);
+#ifdef DEBUG
         printf("Made it to the not NULL\n");
+#endif
     } else {
         swprintf(str, 256, L"N/A", condition);
+#ifdef DEBUG
         printf("Made it to the NULL");
+#endif
     }
 
     hagl_put_text(display, u"000000000000000000", 20, 170, color_black, font6x9);  // clears previous entry

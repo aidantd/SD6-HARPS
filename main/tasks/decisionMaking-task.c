@@ -45,6 +45,7 @@ void decisionMakingTask(void* pvParameter) {
         switch (getShutterStatus()) {
         case SHUTTER_STATUS_OPEN:
             gpio_set_level(LED_GREEN, 1);
+            gpio_set_level(LED_RED, 0);
 
             if (lastRecordedSpeed >= WIND_SPEED_ACTIVATION_THRESHOLD_MPH) {
                 setNeedToUpdateShutterPosition(true);
@@ -62,6 +63,7 @@ void decisionMakingTask(void* pvParameter) {
 
             break;
         case SHUTTER_STATUS_CLOSED:
+            gpio_set_level(LED_GREEN, 0);
             gpio_set_level(LED_RED, 1);
 
             if (lastRecordedSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
@@ -69,16 +71,9 @@ void decisionMakingTask(void* pvParameter) {
 #ifdef DEMO
                 printf("\nThe computer has decided to open the shuttering system\n");
 #endif
-            } else if (getTemperature() <= TEMPERATURE_DEACTIVATION_THRESHOLD_F && getPressure() >= PRESSURE_DEACTIVATION_THRESHOLD_MB) {
-                setNeedToUpdateShutterPosition(true);
-#ifdef DEMO
-                printf("\nThe computer has decided to open the shuttering system\n");
-#endif
-            } else if (memcmp(pCondition, "Torrential rain shower", 23) != 0 || weatherApiWindSpeed <= WIND_SPEED_DEACTIVATION_THRESHOLD_MPH) {
-                setNeedToUpdateShutterPosition(true);
             }
-
             break;
+
         default:
             break;
         }

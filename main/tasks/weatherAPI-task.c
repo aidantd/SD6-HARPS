@@ -242,6 +242,13 @@ static esp_err_t parseJsonResponse(void) {
     return ESP_OK;
 }
 
+// ********************************************************************************
+// Clears the weather data
+// ********************************************************************************
+static void clearWeatherData(void) {
+    memset(&weatherData, 0, sizeof(weatherData));
+}
+
 #ifdef DEBUG
 // ********************************************************************************
 // Prints the JSON response in a formatted output
@@ -308,6 +315,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
             xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
             memset(jsonResponse, 0, sizeof(jsonResponse));
+            clearWeatherData();
         }
         printf("connect to the AP fail\n");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
@@ -462,6 +470,7 @@ esp_err_t wifi_init(void) {
     } else if (bits & WIFI_FAIL_BIT) {
         printf("Failed to connect to SSID:%s, password:%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
         memset(jsonResponse, 0, sizeof(jsonResponse));
+        clearWeatherData();
         return ESP_FAIL;
     } else {
         printf("UNEXPECTED EVENT\n");
