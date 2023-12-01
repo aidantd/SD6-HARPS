@@ -37,12 +37,16 @@ Below is an explanation of the files in the project folder.
 │       └── sen0170.h
 │   └── tasks/                      Contains the system's tasks
 │       └── anemometer-task.c
+│       └── decisionMaking-task.c
 │       └── motor-task.c
 │       └── pt-task.c
+│       └── screen-task.c
 │       └── weatherAPI-task.c
 │   └── userHAL/                    Contains the code for the HAL
 │       └── adc.c
 │       └── adc.h
+│       └── dac.c
+│       └── dac.h
 │       └── i2c.c
 │       └── i2c.h
 │       └── uart.c
@@ -51,6 +55,12 @@ Below is an explanation of the files in the project folder.
 │       └── api/                    Contains the code for interfacing with external APIs
 │           └── geolocationAPI.h
 │           └── weatherAPI.h
+│       └── haglGraphics/           Contains the submodule for the haglGraphics library
+│           └── hagl
+│           └── hagl_hal
+│       └── sensorBoard/            Contains the code for interfacing with external APIs
+│           └── led.c
+│           └── led.h
 │       └── timers/                 Contains the code for the system's timers
 │           └── timers.c
 │           └── timers.h
